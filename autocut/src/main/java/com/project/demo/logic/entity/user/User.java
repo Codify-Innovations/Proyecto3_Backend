@@ -1,4 +1,5 @@
 package com.project.demo.logic.entity.user;
+
 //import com.project.demo.logic.entity.car.Car;
 //import com.project.demo.logic.entity.order.Order;
 import com.project.demo.logic.entity.rol.Role;
@@ -27,6 +28,14 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    // 🟢 NUEVO CAMPO AGREGADO (ya existente)
+    @Column(nullable = false, length = 10)
+    private String visibility = "public"; // Valores válidos: "public" o "private"
+
+    // 🟢 NUEVO CAMPO OPCIONAL PARA PERFIL
+    @Column(length = 200)
+    private String bio; // Biografía corta del usuario (editable desde el frontend)
+
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;
@@ -35,32 +44,19 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role.getName().toString());
-        return List.of(authority);
-    }
-
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;
 
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-//    private List<Order> orders;
-//
-//    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-//    private List<Car> cars;
-
     // Constructors
     public User() {}
 
-//    public List<Car> getCars() {
-//        return cars;
-//    }
-//
-//    public void setCars(List<Car> cars) {
-//        this.cars = cars;
-//    }
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        SimpleGrantedAuthority authority =
+                new SimpleGrantedAuthority("ROLE_" + role.getName().toString());
+        return List.of(authority);
+    }
 
     @Override
     public boolean isAccountNonExpired() {
@@ -128,6 +124,24 @@ public class User implements UserDetails {
         this.password = password;
     }
 
+    // 🟢 GETTER y SETTER NUEVOS
+    public String getVisibility() {
+        return visibility;
+    }
+
+    public void setVisibility(String visibility) {
+        this.visibility = visibility;
+    }
+
+    // 🟢 NUEVOS GETTER/SETTER para la biografía
+    public String getBio() {
+        return bio;
+    }
+
+    public void setBio(String bio) {
+        this.bio = bio;
+    }
+
     public Date getCreatedAt() {
         return createdAt;
     }
@@ -148,17 +162,8 @@ public class User implements UserDetails {
         return role;
     }
 
-//    public List<Order> getOrders() {
-//        return orders;
-//    }
-//
-//    public void setOrders(List<Order> orders) {
-//        this.orders = orders;
-//    }
-
     public User setRole(Role role) {
         this.role = role;
-
         return this;
     }
 }
