@@ -1,5 +1,6 @@
 package com.project.demo.logic.entity.auth;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -27,7 +28,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     public JwtAuthenticationFilter(
             JwtService jwtService,
             UserDetailsService userDetailsService,
-            HandlerExceptionResolver handlerExceptionResolver
+            @Qualifier("handlerExceptionResolver") HandlerExceptionResolver handlerExceptionResolver
     ) {
         this.jwtService = jwtService;
         this.userDetailsService = userDetailsService;
