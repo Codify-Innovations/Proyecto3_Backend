@@ -18,11 +18,14 @@ public class FileServiceImpl implements FileService {
     private static final List<String> IMAGE_TYPES = List.of("image/jpeg", "image/png", "image/webp");
     private static final List<String> VIDEO_TYPES = List.of("video/mp4", "video/webm", "video/ogg");
     private static final List<String> AUDIO_TYPES = List.of("audio/mpeg", "audio/wav", "audio/ogg");
+    private static final long MAX_IMAGE_SIZE = 10 * 1024 * 1024;
+    private static final long MAX_MEDIA_SIZE = 100 * 1024 * 1024;
 
     @Override
     public Map<String, Object> uploadImage(MultipartFile file, String folderName) {
         validateFields(file, folderName);
         validateFileType(file, IMAGE_TYPES);
+        validateFileSize(file, MAX_IMAGE_SIZE);
         return uploadFile(file, folderName, "image");
     }
 
@@ -30,6 +33,7 @@ public class FileServiceImpl implements FileService {
     public Map<String, Object> uploadVideo(MultipartFile file, String folderName) {
         validateFields(file, folderName);
         validateFileType(file, VIDEO_TYPES);
+        validateFileSize(file, MAX_MEDIA_SIZE);
         return uploadFile(file, folderName, "video");
     }
 
@@ -37,6 +41,7 @@ public class FileServiceImpl implements FileService {
     public Map<String, Object> uploadAudio(MultipartFile file, String folderName) {
         validateFields(file, folderName);
         validateFileType(file, AUDIO_TYPES);
+        validateFileSize(file, MAX_MEDIA_SIZE);
         return uploadFile(file, folderName,"video");
     }
 
@@ -52,7 +57,7 @@ public class FileServiceImpl implements FileService {
         return Map.of("url", fileURL);
     }
 
-    /// =============== VALIDACIONES DE FORMATO Y DE CAMPOS VACIOS =============== //
+    /// =============== VALIDACIONES DE CAMPOS VACIOS =============== //
     private void validateFields( MultipartFile file, String folderName) {
 
         if (file == null || file.isEmpty()) {
@@ -63,11 +68,20 @@ public class FileServiceImpl implements FileService {
             throw new IllegalArgumentException("El nombre del folder no puede estar vacío.");
         }
     }
-
+    /// =============== VALIDACIONES DE TIPOS DE ARCHIVO =============== //
     private void validateFileType(MultipartFile file, List<String> allowedTypes) {
         String type = file.getContentType();
         if (type == null || !allowedTypes.contains(type)) {
             throw new IllegalArgumentException("Formato no permitido: " + type);
         }
     }
+    /// =============== VALIDACIONES DE PESO DE ARCHIVO =============== //
+    private void validateFileSize(MultipartFile file, long maxSize) {
+        if (file.getSize() > maxSize) {
+            throw new IllegalArgumentException(
+                    String.format("El archivo excede el tamaño máximo permitido de %.2f MB.", maxSize / (1024.0 * 1024))
+            );
+        }
+    }
+
 }
