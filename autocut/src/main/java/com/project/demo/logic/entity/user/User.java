@@ -17,11 +17,14 @@ import java.util.List;
 @Table(name = "user")
 @Entity
 public class User implements UserDetails {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     private String name;
     private String lastname;
+
     @Column(unique = true, length = 100, nullable = false)
     private String email;
 
@@ -48,9 +51,18 @@ public class User implements UserDetails {
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;
 
-    // Constructors
+
+
+    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    // private List<Order> orders;
+    //
+    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
+    // private List<Car> cars;
+
+  
     public User() {}
 
+  
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority =
@@ -83,6 +95,7 @@ public class User implements UserDetails {
         return email;
     }
 
+   
     public Long getId() {
         return id;
     }
@@ -166,4 +179,22 @@ public class User implements UserDetails {
         this.role = role;
         return this;
     }
+
+
+    // public List<Order> getOrders() {
+    //     return orders;
+    // }
+    //
+    // public void setOrders(List<Order> orders) {
+    //     this.orders = orders;
+    // }
+    //
+    // public List<Car> getCars() {
+    //     return cars;
+    // }
+    //
+    // public void setCars(List<Car> cars) {
+    //     this.cars = cars;
+    // }
+
 }
