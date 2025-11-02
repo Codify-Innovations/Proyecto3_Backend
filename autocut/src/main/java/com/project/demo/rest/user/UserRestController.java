@@ -29,9 +29,6 @@ public class UserRestController {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
-    // ========================================
-    // 🔹 ENDPOINTS EXISTENTES (NO TOCAR)
-    // ========================================
 
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
@@ -97,10 +94,7 @@ public class UserRestController {
         return (User) authentication.getPrincipal();
     }
 
-    // ========================================
-    // 🆕 NUEVOS ENDPOINTS DE CONFIGURACIÓN DE PRIVACIDAD
-    // ========================================
-
+  
     @GetMapping("/privacy")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getMyPrivacySetting(HttpServletRequest request) {
@@ -143,9 +137,6 @@ public class UserRestController {
         );
     }
 
-    // ========================================
-    // 🆕 NUEVOS ENDPOINTS DE PERFIL PERSONAL
-    // ========================================
 
     /**
      * GET /users/profile → Obtiene el perfil del usuario autenticado
@@ -167,37 +158,52 @@ public class UserRestController {
     /**
      * PUT /users/profile → Actualiza los datos personales del usuario autenticado
      */
-    @PutMapping("/profile")
-    @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateMyProfile(@RequestBody User updatedData, HttpServletRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
+   @PutMapping("/profile")
+@PreAuthorize("isAuthenticated()")
+public ResponseEntity<?> updateMyProfile(@RequestBody User updatedData, HttpServletRequest request) {
+    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+    User principal = (User) auth.getPrincipal();
 
-        if (updatedData.getName() != null && !updatedData.getName().isBlank()) {
-            user.setName(updatedData.getName());
-        }
-        if (updatedData.getLastname() != null && !updatedData.getLastname().isBlank()) {
-            user.setLastname(updatedData.getLastname());
-        }
-        if (updatedData.getEmail() != null && !updatedData.getEmail().isBlank()) {
-            user.setEmail(updatedData.getEmail());
-        }
-        if (updatedData.getBio() != null) {
-            user.setBio(updatedData.getBio());
-        }
-        if (updatedData.getPassword() != null && !updatedData.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(updatedData.getPassword()));
-        }
+  
+    User user = userRepository.findByEmail(principal.getEmail())
+            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        userRepository.save(user);
-
-        return new GlobalResponseHandler().handleResponse(
-                "Datos personales actualizados correctamente.",
-                user,
-                HttpStatus.OK,
-                request
-        );
+    if (updatedData.getName() != null && !updatedData.getName().isBlank()) {
+        user.setName(updatedData.getName());
     }
+    if (updatedData.getLastname() != null && !updatedData.getLastname().isBlank()) {
+        user.setLastname(updatedData.getLastname());
+    }
+    if (updatedData.getEmail() != null && !updatedData.getEmail().isBlank()) {
+        user.setEmail(updatedData.getEmail());
+    }
+    if (updatedData.getBio() != null) {
+        user.setBio(updatedData.getBio());
+    }
+
+   if (updatedData.getVisibility() != null && !updatedData.getVisibility().isBlank()) {
+    user.setVisibility(updatedData.getVisibility());
+    }
+
+  
+    if (updatedData.getAvatarUrl() != null && !updatedData.getAvatarUrl().isBlank()) {
+        user.setAvatarUrl(updatedData.getAvatarUrl());
+    }
+
+    if (updatedData.getPassword() != null && !updatedData.getPassword().isBlank()) {
+        user.setPassword(passwordEncoder.encode(updatedData.getPassword()));
+    }
+
+    userRepository.save(user);
+
+    return new GlobalResponseHandler().handleResponse(
+            "Datos personales actualizados correctamente.",
+            user,
+            HttpStatus.OK,
+            request
+    );
+}
+
 
     // DTO interno para visibilidad
     public static class PrivacyRequest {

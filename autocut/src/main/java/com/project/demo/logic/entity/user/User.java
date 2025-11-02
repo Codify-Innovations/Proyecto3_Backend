@@ -52,6 +52,18 @@ public class User implements UserDetails {
     private Role role;
 
 
+@Column(length = 500)
+private String avatarUrl; // URL del avatar o imagen de perfil
+
+public String getAvatarUrl() {
+    return avatarUrl;
+}
+
+public void setAvatarUrl(String avatarUrl) {
+    this.avatarUrl = avatarUrl;
+}
+
+
 
     // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     // private List<Order> orders;
@@ -137,7 +149,7 @@ public class User implements UserDetails {
         this.password = password;
     }
 
-    // 🟢 GETTER y SETTER NUEVOS
+ 
     public String getVisibility() {
         return visibility;
     }
@@ -146,7 +158,6 @@ public class User implements UserDetails {
         this.visibility = visibility;
     }
 
-    // 🟢 NUEVOS GETTER/SETTER para la biografía
     public String getBio() {
         return bio;
     }
