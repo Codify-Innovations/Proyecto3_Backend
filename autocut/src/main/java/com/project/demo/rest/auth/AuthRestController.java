@@ -1,6 +1,7 @@
 package com.project.demo.rest.auth;
 
 import com.project.demo.logic.entity.auth.AuthenticationService;
+import com.project.demo.logic.entity.auth.GoogleAuthService;
 import com.project.demo.logic.entity.auth.JwtService;
 import com.project.demo.logic.entity.rol.Role;
 import com.project.demo.logic.entity.rol.RoleEnum;
@@ -17,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Map;
 import java.util.Optional;
 
 @RequestMapping("/auth")
@@ -32,6 +34,9 @@ public class AuthRestController {
 
     @Autowired
     private RoleRepository roleRepository;
+
+    @Autowired
+    private GoogleAuthService googleAuthService;
 
 
 
@@ -76,6 +81,26 @@ public class AuthRestController {
         user.setRole(optionalRole.get());
         User savedUser = userRepository.save(user);
         return ResponseEntity.ok(savedUser);
+    }
+
+    @PostMapping("/google")
+    public ResponseEntity<LoginResponse> authenticateWithGoogle(@RequestBody Map<String, String> requestBody) {
+        try {
+            String idToken = requestBody.get("idToken");
+            User user = googleAuthService.verifyAndGetUser(idToken);
+
+            String jwtToken = jwtService.generateToken(user);
+
+            LoginResponse loginResponse = new LoginResponse();
+            loginResponse.setToken(jwtToken);
+            loginResponse.setExpiresIn(jwtService.getExpirationTime());
+            loginResponse.setAuthUser(user);
+
+            return ResponseEntity.ok(loginResponse);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body(new LoginResponse("Google authentication failed: " + e.getMessage()));
+        }
     }
 
 }
