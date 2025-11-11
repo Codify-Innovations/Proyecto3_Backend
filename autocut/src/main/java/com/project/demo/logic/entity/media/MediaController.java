@@ -39,7 +39,7 @@ public class MediaController {
             }
 
         
-          String pythonApiUrl = "http://127.0.0.1:8088/api/analyze";
+          String pythonApiUrl = "http://127.0.0.1:8000/api/analyze";
 
 
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
