@@ -1,7 +1,5 @@
 package com.project.demo.logic.entity.media;
 
-
-
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
@@ -37,9 +35,8 @@ public class MediaController {
             if (file.getSize() > 50 * 1024 * 1024) {
                 return ResponseEntity.badRequest().body("El archivo excede 50MB.");
             }
-
         
-          String pythonApiUrl = "http://127.0.0.1:8088/api/analyze";
+   String pythonApiUrl = "http://127.0.0.1:8000/api/analyze";
 
 
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
