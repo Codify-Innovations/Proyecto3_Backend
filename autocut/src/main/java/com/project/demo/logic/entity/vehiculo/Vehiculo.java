@@ -27,9 +27,6 @@ public class Vehiculo {
     @Column(name = "anio")
     private int anio;
 
-    @Column(name = "confianza", precision = 5, scale = 2)
-    private BigDecimal confianza;
-
     @Column(name = "imagen_url")
     private String imagenURL;
 
@@ -81,13 +78,6 @@ public class Vehiculo {
         this.anio = anio;
     }
 
-    public BigDecimal getConfianza() {
-        return confianza;
-    }
-
-    public void setConfianza(BigDecimal confianza) {
-        this.confianza = confianza;
-    }
 
     public String getImagenURL() {
         return imagenURL;
