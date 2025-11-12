@@ -31,6 +31,7 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
                         .requestMatchers("/api/files/**").permitAll() // ===== QUITAR CUANDO HAYA AUTENTICACION ===== //
+                        .requestMatchers("/api/vehiculos/**").permitAll() // ===== QUITAR CUANDO HAYA AUTENTICACION ===== //
                         .anyRequest().authenticated()
                 )
                 .sessionManagement()
