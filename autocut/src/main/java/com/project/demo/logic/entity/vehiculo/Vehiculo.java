@@ -30,6 +30,17 @@ public class Vehiculo {
     @Column(name = "imagen_url")
     private String imagenURL;
 
+    @Column(length = 50, nullable = false)
+    private String color;
+
+    public String getColor() {
+        return color;
+    }
+
+    public void setColor(String color) {
+        this.color = color;
+    }
+
     public String getCategoria() {
         return categoria;
     }
