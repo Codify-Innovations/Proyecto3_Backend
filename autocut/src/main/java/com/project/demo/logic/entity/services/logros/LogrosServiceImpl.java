@@ -70,6 +70,8 @@ public class LogrosServiceImpl implements LogrosService{
         nuevo.setFechaDesbloqueo(LocalDateTime.now());
         usuarioLogroRepository.save(nuevo);
 
+        System.out.println("El usuario " + usuario.getId() + "desbloqueó un logro: " + logro.getNombre());
+
         Notificacion notificacion = new Notificacion();
         notificacion.setUsuario(usuario);
         notificacion.setMensaje("¡Has desbloqueado el logro " + logro.getNombre() + "!");
