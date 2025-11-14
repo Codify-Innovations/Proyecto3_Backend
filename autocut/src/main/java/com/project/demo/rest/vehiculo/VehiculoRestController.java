@@ -2,6 +2,8 @@ package com.project.demo.rest.vehiculo;
 
 import com.project.demo.logic.entity.http.GlobalResponseHandler;
 import com.project.demo.logic.entity.http.Meta;
+import com.project.demo.logic.entity.services.logros.LogrosService;
+import com.project.demo.logic.entity.user.UserRepository;
 import com.project.demo.logic.entity.vehiculo.Vehiculo;
 import com.project.demo.logic.entity.vehiculo.VehiculoRepository;
 import com.project.demo.logic.entity.user.User;
@@ -25,6 +27,13 @@ public class VehiculoRestController {
 
     @Autowired
     private VehiculoRepository vehiculoRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private LogrosService logrosService;
+
     @PostMapping("/{id}")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> addVehiculo(
@@ -33,11 +42,15 @@ public class VehiculoRestController {
             HttpServletRequest request) {
 
         vehiculo.setUsuarioId(usuarioId);
-
         vehiculoRepository.save(vehiculo);
 
+        User usuario = userRepository.findById(usuarioId)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+
+        logrosService.evaluateAchievementsForUser(usuario);
+
         return new GlobalResponseHandler().handleResponse(
-                "Vehículo registrado correctamente para el usuario con ID " + usuarioId,
+                "Vehículo registrado correctamente y logros evaluados para el usuario: " + usuarioId,
                 vehiculo,
                 HttpStatus.CREATED,
                 request
