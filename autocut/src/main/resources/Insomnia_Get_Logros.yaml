@@ -1,0 +1,101 @@
+type: collection.insomnia.rest/5.0
+name: Autocut
+meta:
+  id: wrk_d5df27a38c714dd39de602989a409253
+  created: 1761618789798
+  modified: 1761618789797
+  description: ""
+collection:
+  - url: "{{ _.base_url }}api/logros/mis-logros"
+    name: Logros/mis-logros
+    meta:
+      id: req_bf7d43567f7d47389f3ae728888471c0
+      created: 1762980169022
+      modified: 1763059226631
+      isPrivate: false
+      description: ""
+      sortKey: -1759642499388.8125
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/11.6.2
+    authentication:
+      type: bearer
+      token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdXBlci5hZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3NjMwNTkwNTMsImV4cCI6MTc2MzA2MjY1M30.BlTEs24kvYnp_GP4EqmVw_xmkfqflInV5W4AXhbVtdk
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{ _.base_url }}auth/login"
+    name: Auth
+    meta:
+      id: req_bff5b2ad30c34d83a504f11b8e780030
+      created: 1762980300790
+      modified: 1762980402942
+      isPrivate: false
+      description: ""
+      sortKey: -1762980300790
+    method: POST
+    body:
+      mimeType: application/json
+      text: |-
+        {
+        	"email": "super.admin@gmail.com", 
+        	"password": "superadmin123"
+        }
+    headers:
+      - name: Content-Type
+        value: application/json
+      - name: User-Agent
+        value: insomnia/12.0.0
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+  - url: "{{ _.base_url }}api/logros/usuario/2"
+    name: Logros/usuario/{userId}
+    meta:
+      id: req_03707419770e4480bd9bb920dee534b5
+      created: 1762982786280
+      modified: 1763064171888
+      isPrivate: false
+      description: ""
+      sortKey: -1759566488046.3438
+    method: GET
+    headers:
+      - name: User-Agent
+        value: insomnia/11.6.2
+    authentication:
+      type: bearer
+      token: eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJzdXBlci5hZG1pbkBnbWFpbC5jb20iLCJpYXQiOjE3NjMwNTkwNTMsImV4cCI6MTc2MzA2MjY1M30.BlTEs24kvYnp_GP4EqmVw_xmkfqflInV5W4AXhbVtdk
+    settings:
+      renderRequestBody: true
+      encodeUrl: true
+      followRedirects: global
+      cookies:
+        send: true
+        store: true
+      rebuildPath: true
+cookieJar:
+  name: Default Jar
+  meta:
+    id: jar_d8241e889e3a33dc1ecd5d65240e73189fceefb9
+    created: 1761618789810
+    modified: 1761618789810
+environments:
+  name: Base Environment
+  meta:
+    id: env_d8241e889e3a33dc1ecd5d65240e73189fceefb9
+    created: 1761618789805
+    modified: 1761700087249
+    isPrivate: false
+  data:
+    base_url: http://localhost:8080/
