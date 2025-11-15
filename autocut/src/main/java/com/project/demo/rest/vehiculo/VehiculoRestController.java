@@ -41,11 +41,11 @@ public class VehiculoRestController {
             @RequestBody Vehiculo vehiculo,
             HttpServletRequest request) {
 
-        vehiculo.setUsuarioId(usuarioId);
-        vehiculoRepository.save(vehiculo);
-
         User usuario = userRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
+
+        vehiculo.setUsuario(usuario);
+        vehiculoRepository.save(vehiculo);
 
         logrosService.evaluateAchievementsForUser(usuario);
 

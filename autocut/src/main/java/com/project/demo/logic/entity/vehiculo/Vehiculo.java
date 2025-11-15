@@ -1,6 +1,8 @@
 package com.project.demo.logic.entity.vehiculo;
 
+import com.project.demo.logic.entity.user.User;
 import jakarta.persistence.*;
+
 import java.math.BigDecimal;
 
 @Entity
@@ -12,8 +14,10 @@ public class Vehiculo {
     @Column(nullable = false)
     private Long id;
 
-    @Column(name = "usuario_id", nullable = false)
-    private Long usuarioId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "usuario_id", nullable = false)
+    private User usuario;
+
 
     @Column(length = 100, nullable = false)
     private String marca;
@@ -57,12 +61,13 @@ public class Vehiculo {
         this.id = id;
     }
 
-    public Long getUsuarioId() {
-        return usuarioId;
+
+    public User getUsuario() {
+        return usuario;
     }
 
-    public void setUsuarioId(Long usuarioId) {
-        this.usuarioId = usuarioId;
+    public void setUsuario(User usuario) {
+        this.usuario = usuario;
     }
 
     public String getMarca() {
