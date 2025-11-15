@@ -44,7 +44,7 @@ public class VehiculoRestController {
         User usuario = userRepository.findById(usuarioId)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
 
-        vehiculo.(usuario);
+        vehiculo.setUsuario(usuario);
         vehiculoRepository.save(vehiculo);
 
         logrosService.evaluateAchievementsForUser(usuario);
