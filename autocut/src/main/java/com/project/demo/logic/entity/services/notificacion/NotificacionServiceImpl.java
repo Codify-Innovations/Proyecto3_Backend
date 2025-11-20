@@ -31,10 +31,10 @@ public class NotificacionServiceImpl implements  NotificacionService{
     }
 
     public void marcarLeida(Long id) {
-        Notificacion n = notificacionRepository.findById(id).orElse(null);
-        if (n != null) {
-            n.setLeida(true);
-            notificacionRepository.save(n);
+        Notificacion notificacion = notificacionRepository.findById(id).orElse(null);
+        if (notificacion != null) {
+            notificacion.setLeida(true);
+            notificacionRepository.save(notificacion);
         }
     }
 }
