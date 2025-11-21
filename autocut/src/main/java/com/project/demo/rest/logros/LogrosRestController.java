@@ -85,14 +85,4 @@ public class LogrosRestController {
                 request
         );
     }
-
-    @GetMapping("/ranking")
-    public ResponseEntity<?> getRanking(HttpServletRequest request) {
-        return responseHandler.handleResponse(
-                "Endpoint de ranking preparado. Implementación pendiente.",
-                null,
-                HttpStatus.OK,
-                request
-        );
-    }
 }

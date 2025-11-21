@@ -71,18 +71,8 @@ public class LogrosServiceImpl implements LogrosService{
         nuevo.setFechaDesbloqueo(LocalDateTime.now());
         usuarioLogroRepository.save(nuevo);
 
-
-        System.out.println("El usuario " + usuario.getId() + "desbloqueó un logro: " + logro.getNombre());
-
         String mensaje = "¡Has desbloqueado el logro " + logro.getNombre() + "!";
         notificacionService.crearNotificacion(usuario, mensaje, "logro");
-
-//        Notificacion notificacion = new Notificacion();
-//        notificacion.setUsuario(usuario);
-//        notificacion.setMensaje("¡Has desbloqueado el logro " + logro.getNombre() + "!");
-//        notificacion.setTipo("logro");
-//        notificacion.setFecha(LocalDateTime.now());
-//        notificacionRepository.save(notificacion);
     }
     @Override
     public List<Logro> getAllActiveAchievements() {
