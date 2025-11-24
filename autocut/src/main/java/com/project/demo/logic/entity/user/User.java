@@ -38,6 +38,12 @@ public class User implements UserDetails {
     @Column(length = 200)
     private String bio;
 
+    @Column(nullable = false)
+    private boolean active = true;
+
+    @Column(length = 200)
+    private String bio; 
+
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;
@@ -56,6 +62,33 @@ public class User implements UserDetails {
     public User() {}
 
   
+    @Override
+    public Collection<? extends GrantedAuthority> getAuthorities() {
+        SimpleGrantedAuthority authority =
+                new SimpleGrantedAuthority("ROLE_" + role.getName().toString());
+        return List.of(authority);
+    }
+
+    @Override
+    public boolean isAccountNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isAccountNonLocked() {
+        return true;
+    }
+
+    @Override
+    public boolean isCredentialsNonExpired() {
+        return true;
+    }
+
+    @Override
+    public boolean isEnabled() {
+        return this.active;
+    }    
+
     @Override
     public String getUsername() {
         return this.email;
@@ -84,6 +117,17 @@ public class User implements UserDetails {
 
     public String getLastname() { return lastname; }
     public void setLastname(String lastname) { this.lastname = lastname; }
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public String getBio() {
+        return bio;
+    }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
