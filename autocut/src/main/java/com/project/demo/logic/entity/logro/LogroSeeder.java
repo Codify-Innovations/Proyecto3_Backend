@@ -24,30 +24,17 @@ public class LogroSeeder implements ApplicationListener<ContextRefreshedEvent> {
 
     private void crearLogrosIniciales() {
 
-        crearLogroSiNoExiste("Cazador JDM", "Detecta 5 vehículos de la categoría JDM.", "JDM", "categoria_count", 5, "");
+        crearLogroSiNoExiste("Cazador JDM", "Detecta 5 vehículos de la categoría JDM.", "JDM", "categoria_count", 5, "https://res.cloudinary.com/dzejxb251/image/upload/v1763410555/CAZADOR_JDM_ygdaso.png");
 
-        crearLogroSiNoExiste("Maestro Supercar", "Detecta 5 vehículos de la categoría Supercar.", "Supercar", "categoria_count", 5, "");
+        crearLogroSiNoExiste("Maestro Supercar", "Detecta 5 vehículos de la categoría Supercar.", "Supercar", "categoria_count", 5, "https://res.cloudinary.com/dzejxb251/image/upload/v1763415585/MAESTRO_SUPERCAR_ebiqsj.png");
 
-        crearLogroSiNoExiste("Amante de Toyota", "Registra 5 vehículos de la marca Toyota.", "Toyota", "marca_count", 5, "");
+        crearLogroSiNoExiste("Entusiasta Muscle", "Identifica 2 vehículos de la categoría Muscle.", "muscle", "categoria_count", 2, "https://res.cloudinary.com/dzejxb251/image/upload/v1763415585/ENTUSIASTA_MUSCLE_kguvmq.png");
 
-        crearLogroSiNoExiste("Explorador Automotriz", "Registra un total de 20 vehículos, sin importar categoría.", null, "total_detectados", 20, "");
+        crearLogroSiNoExiste("Maestro Porsche", "Registra 3 vehículos de la marca Porsche.", "porsche", "marca_count", 3, "https://res.cloudinary.com/dzejxb251/image/upload/v1763416982/MAESTRO_PORSCHE_toxtjp.png");
 
-        crearLogroSiNoExiste("Coleccionista Élite", "Registra un total de 50 vehículos diferentes en tu colección.", null, "total_detectados", 50, "");
+        crearLogroSiNoExiste("Cazador Hypercar", "Registra 1 vehículo de la categoría Hypercar.", "hypercar", "categoria_count", 1, "https://res.cloudinary.com/dzejxb251/image/upload/v1763415585/CAZADOR_HYPERCAR_soxt8i.png");
 
-        crearLogroSiNoExiste("Aficionado a los Supercars", "Detecta 3 vehículos de la categoría Supercar.", "supercar", "categoria_count", 3, "");
-
-        crearLogroSiNoExiste("Corazón Sports", "Registra 5 autos deportivos de la categoría Sports.", "sports", "categoria_count", 5, "");
-
-        crearLogroSiNoExiste("Amante de los Muscle Cars", "Identifica 2 vehículos de la categoría Muscle.", "muscle", "categoria_count", 2, "");
-
-        crearLogroSiNoExiste("Fan de Porsche", "Registra 2 vehículos de la marca Porsche.", "porsche", "marca_count", 2, "");
-
-        crearLogroSiNoExiste("Cazador de Hypercars", "Registra 1 vehículo de la categoría Hypercar.", "hypercar", "categoria_count", 1, "");
-
-        crearLogroSiNoExiste("Espíritu Off-Road", "Detecta 3 vehículos Off-Road.", "off-road", "categoria_count", 3, "");
-
-        crearLogroSiNoExiste("Maestro de los Convertibles", "Identifica 2 convertibles de cualquier color.", "convertible", "categoria_count", 2, "");
-
+        crearLogroSiNoExiste("Maestro Off-Road", "Detecta 2 vehículos de la categoría Off-Road.", "off-road", "categoria_count", 2, "https://res.cloudinary.com/dzejxb251/image/upload/v1763417820/FANATICO_OFF_ROAD_gm2e07.png");
     }
 
     private void crearLogroSiNoExiste(String nombre, String descripcion, String categoria, String criterio, int cantidadRequerida, String iconoUrl) {
