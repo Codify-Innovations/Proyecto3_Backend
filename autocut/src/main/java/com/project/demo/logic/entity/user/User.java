@@ -31,13 +31,14 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
-    // 🟢 NUEVO CAMPO AGREGADO (ya existente)
     @Column(nullable = false, length = 10)
-    private String visibility = "public"; // Valores válidos: "public" o "private"
+    private String visibility = "public";
 
-    // 🟢 NUEVO CAMPO OPCIONAL PARA PERFIL
+    @Column(nullable = false)
+    private boolean active = true;
+
     @Column(length = 200)
-    private String bio; // Biografía corta del usuario (editable desde el frontend)
+    private String bio; 
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -99,8 +100,8 @@ public void setAvatarUrl(String avatarUrl) {
 
     @Override
     public boolean isEnabled() {
-        return true;
-    }
+        return this.active;
+    }    
 
     @Override
     public String getUsername() {
@@ -156,6 +157,14 @@ public void setAvatarUrl(String avatarUrl) {
 
     public void setVisibility(String visibility) {
         this.visibility = visibility;
+    }
+
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
     }
 
     public String getBio() {
