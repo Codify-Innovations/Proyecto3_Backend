@@ -34,6 +34,9 @@ public class Vehiculo {
     @Column(name = "imagen_url")
     private String imagenURL;
 
+    @Column(name = "imagen_hot_wheels")
+    private String imagenHotWheels;
+
     @Column(length = 50, nullable = false)
     private String color;
 
@@ -101,5 +104,13 @@ public class Vehiculo {
 
     public void setImagenURL(String imagenURL) {
         this.imagenURL = imagenURL;
+    }
+
+    public String getImagenHotWheels() {
+        return imagenHotWheels;
+    }
+
+    public void setImagenHotWheels(String imagenHotWheels) {
+        this.imagenHotWheels = imagenHotWheels;
     }
 }
