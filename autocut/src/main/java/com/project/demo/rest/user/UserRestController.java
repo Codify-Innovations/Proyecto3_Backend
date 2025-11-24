@@ -267,37 +267,6 @@ private LogrosService logrosService;
     }
 
     
-   @PutMapping("/profile")
-@PreAuthorize("isAuthenticated()")
-public ResponseEntity<?> updateMyProfile(@RequestBody User updatedData, HttpServletRequest request) {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    User principal = (User) auth.getPrincipal();
-
-  
-    User user = userRepository.findByEmail(principal.getEmail())
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-    if (updatedData.getName() != null && !updatedData.getName().isBlank()) {
-        user.setName(updatedData.getName());
-    }
-    if (updatedData.getLastname() != null && !updatedData.getLastname().isBlank()) {
-        user.setLastname(updatedData.getLastname());
-    }
-    if (updatedData.getEmail() != null && !updatedData.getEmail().isBlank()) {
-        user.setEmail(updatedData.getEmail());
-    }
-    if (updatedData.getBio() != null) {
-        user.setBio(updatedData.getBio());
-    }
-
-   if (updatedData.getVisibility() != null && !updatedData.getVisibility().isBlank()) {
-    user.setVisibility(updatedData.getVisibility());
-    }
-
-  
-    if (updatedData.getAvatarUrl() != null && !updatedData.getAvatarUrl().isBlank()) {
-        user.setAvatarUrl(updatedData.getAvatarUrl());
-    }
     @PutMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> updateMyProfile(@RequestBody User updatedData, HttpServletRequest request) {
@@ -519,6 +488,8 @@ public static class PublicProfileResponse {
         this.allowed = allowed;
         this.profile = profile;
     }
+}
+
     @GetMapping("/search")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> searchUsers(
@@ -545,5 +516,4 @@ public static class PublicProfileResponse {
                 meta
         );
     }
-}
 }
