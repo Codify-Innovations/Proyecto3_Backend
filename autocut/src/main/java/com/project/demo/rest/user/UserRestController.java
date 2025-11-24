@@ -2,8 +2,13 @@ package com.project.demo.rest.user;
 
 import com.project.demo.logic.entity.http.GlobalResponseHandler;
 import com.project.demo.logic.entity.http.Meta;
+import com.project.demo.logic.entity.services.logros.LogrosService;
 import com.project.demo.logic.entity.user.User;
 import com.project.demo.logic.entity.user.UserRepository;
+import com.project.demo.logic.entity.vehicle.VehicleCustomization;
+import com.project.demo.logic.entity.vehicle.VehicleCustomizationService;
+import com.project.demo.logic.entity.vehiculo.VehiculoRepository;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -16,6 +21,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
+import java.util.Date;
+
+
 
 import java.util.Optional;
 
@@ -28,6 +36,17 @@ public class UserRestController {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+  
+
+@Autowired
+private VehicleCustomizationService customizationService;
+
+@Autowired
+private VehiculoRepository vehiculoRepository;
+
+@Autowired
+private LogrosService logrosService;
+
 
 
     @GetMapping
@@ -138,9 +157,7 @@ public class UserRestController {
     }
 
 
-    /**
-     * GET /users/profile → Obtiene el perfil del usuario autenticado
-     */
+   
     @GetMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getMyProfile(HttpServletRequest request) {
@@ -155,9 +172,7 @@ public class UserRestController {
         );
     }
 
-    /**
-     * PUT /users/profile → Actualiza los datos personales del usuario autenticado
-     */
+    
    @PutMapping("/profile")
 @PreAuthorize("isAuthenticated()")
 public ResponseEntity<?> updateMyProfile(@RequestBody User updatedData, HttpServletRequest request) {
@@ -205,7 +220,7 @@ public ResponseEntity<?> updateMyProfile(@RequestBody User updatedData, HttpServ
 }
 
 
-    // DTO interno para visibilidad
+  
     public static class PrivacyRequest {
         private String visibility;
 
@@ -217,4 +232,173 @@ public ResponseEntity<?> updateMyProfile(@RequestBody User updatedData, HttpServ
             this.visibility = visibility;
         }
     }
+
+@GetMapping("/explore-users")
+public ResponseEntity<?> getPublicUsers(HttpServletRequest request) {
+
+    var users = userRepository.findAll();
+
+    var mapped = users.stream()
+            .map(u -> {
+
+                Object customization = null;
+                try {
+                    customization = customizationService.getCustomizationByUser(u.getId());
+                } catch (Exception ignored) {}
+
+                return new PublicUserResponse(
+                        u.getUsername(),                   
+                        u.getAvatarUrl(),
+                        u.getVisibility(),
+                        u.getCreatedAt() != null ? u.getCreatedAt().toString() : null,
+                        customization
+                );
+            })
+            .toList();
+
+    return new GlobalResponseHandler().handleResponse(
+            "Usuarios encontrados",
+            mapped,
+            HttpStatus.OK,
+            request
+    );
+}
+
+
+@GetMapping("/explore-users/{username}")
+public ResponseEntity<?> getPublicProfile(
+        @PathVariable String username,
+        HttpServletRequest request
+) {
+
+    Optional<User> optional = userRepository.findByUsername(username);
+
+    if (optional.isEmpty()) {
+        return new GlobalResponseHandler().handleResponse(
+                "Usuario no encontrado",
+                HttpStatus.NOT_FOUND,
+                request
+        );
+    }
+
+    User user = optional.get();
+
+    if ("private".equalsIgnoreCase(user.getVisibility())) {
+        return new GlobalResponseHandler().handleResponse(
+                "Perfil privado",
+                new PublicProfileResponse(false, null),
+                HttpStatus.OK,
+                request
+        );
+    }
+
+
+    Object customization = null;
+    try {
+        customization = customizationService.getCustomizationByUser(user.getId());
+    } catch (Exception ignored) {}
+
+
+    var cars = vehiculoRepository.findByUsuarioId(user.getId().intValue());
+
+    var logros = logrosService.getUnlockedAchievements(user);
+
+  
+    var fullProfile = new FullPublicUserProfile(
+            user.getUsername(),                    
+            user.getName(),
+            user.getLastname(),
+            user.getEmail(),
+            user.getAvatarUrl(),
+            user.getVisibility(),
+            user.getBio(),
+            user.getCreatedAt() != null ? user.getCreatedAt().toString() : null,
+            customization,
+            cars,
+            logros
+    );
+
+    return new GlobalResponseHandler().handleResponse(
+            "Perfil público cargado correctamente",
+            new PublicProfileResponse(true, fullProfile),
+            HttpStatus.OK,
+            request
+    );
+}
+
+
+public static class PublicUserResponse {
+    public String username;
+    public String avatarUrl;
+    public String visibility;
+    public String createdAt;
+    public Object customization;
+
+    public PublicUserResponse(
+            String username,
+            String avatarUrl,
+            String visibility,
+            String createdAt,
+            Object customization
+    ) {
+        this.username = username;
+        this.avatarUrl = avatarUrl;
+        this.visibility = visibility;
+        this.createdAt = createdAt;
+        this.customization = customization;
+    }
+}
+
+
+public static class FullPublicUserProfile {
+
+    public String username;       
+    public String name;
+    public String lastname;
+    public String email;
+    public String avatarUrl;
+    public String visibility;
+    public String bio;
+    public String createdAt;
+
+    public Object customization;
+    public Object cars;
+    public Object logros;
+
+    public FullPublicUserProfile(
+            String username,      
+            String name,
+            String lastname,
+            String email,
+            String avatarUrl,
+            String visibility,
+            String bio,
+            String createdAt,
+            Object customization,
+            Object cars,
+            Object logros
+    ) {
+        this.username = username;   
+        this.name = name;
+        this.lastname = lastname;
+        this.email = email;
+        this.avatarUrl = avatarUrl;
+        this.visibility = visibility;
+        this.bio = bio;
+        this.createdAt = createdAt;
+        this.customization = customization;
+        this.cars = cars;
+        this.logros = logros;
+    }
+}
+
+public static class PublicProfileResponse {
+    public boolean allowed;
+    public Object profile;
+
+    public PublicProfileResponse(boolean allowed, Object profile) {
+        this.allowed = allowed;
+        this.profile = profile;
+    }
+}
 }

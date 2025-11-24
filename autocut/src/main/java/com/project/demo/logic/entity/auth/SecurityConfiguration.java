@@ -30,8 +30,8 @@ public class SecurityConfiguration {
                 .csrf().disable()
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
-                        .requestMatchers("/api/files/**").permitAll() // ===== QUITAR CUANDO HAYA AUTENTICACION ===== //
-                        .requestMatchers("/api/vehiculos/**").permitAll() // ===== QUITAR CUANDO HAYA AUTENTICACION ===== //
+                        .requestMatchers("/api/files/**").permitAll() 
+                        .requestMatchers("/api/vehiculos/**").permitAll() 
                         .anyRequest().authenticated()
                 )
                 .sessionManagement()
