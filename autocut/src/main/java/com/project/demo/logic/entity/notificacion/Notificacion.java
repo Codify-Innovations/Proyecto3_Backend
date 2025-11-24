@@ -25,6 +25,9 @@ public class Notificacion {
     @Column(nullable = false)
     private LocalDateTime fecha = LocalDateTime.now();
 
+    @Column(nullable = false)
+    private Boolean leida = false;
+
     public Long getId() {
         return id;
     }
@@ -73,6 +76,5 @@ public class Notificacion {
         this.fecha = fecha;
     }
 
-    @Column(nullable = false)
-    private Boolean leida = false;
+
 }

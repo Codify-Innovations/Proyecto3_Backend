@@ -4,6 +4,7 @@ import com.project.demo.logic.entity.logro.Logro;
 import com.project.demo.logic.entity.logro.LogroRepository;
 import com.project.demo.logic.entity.notificacion.Notificacion;
 import com.project.demo.logic.entity.notificacion.NotificacionRepository;
+import com.project.demo.logic.entity.services.notificacion.NotificacionService;
 import com.project.demo.logic.entity.user.User;
 import com.project.demo.logic.entity.usuarioLogro.UsuarioLogro;
 import com.project.demo.logic.entity.usuarioLogro.UsuarioLogroRepository;
@@ -23,7 +24,7 @@ public class LogrosServiceImpl implements LogrosService{
     @Autowired
     private UsuarioLogroRepository usuarioLogroRepository;
     @Autowired
-    private NotificacionRepository notificacionRepository;
+    private NotificacionService notificacionService;
     @Autowired
     private VehiculoRepository vehiculoRepository;
 
@@ -70,14 +71,8 @@ public class LogrosServiceImpl implements LogrosService{
         nuevo.setFechaDesbloqueo(LocalDateTime.now());
         usuarioLogroRepository.save(nuevo);
 
-        System.out.println("El usuario " + usuario.getId() + "desbloqueó un logro: " + logro.getNombre());
-
-        Notificacion notificacion = new Notificacion();
-        notificacion.setUsuario(usuario);
-        notificacion.setMensaje("¡Has desbloqueado el logro " + logro.getNombre() + "!");
-        notificacion.setTipo("logro");
-        notificacion.setFecha(LocalDateTime.now());
-        notificacionRepository.save(notificacion);
+        String mensaje = "¡Has desbloqueado el logro " + logro.getNombre() + "!";
+        notificacionService.crearNotificacion(usuario, mensaje, "logro");
     }
     @Override
     public List<Logro> getAllActiveAchievements() {
