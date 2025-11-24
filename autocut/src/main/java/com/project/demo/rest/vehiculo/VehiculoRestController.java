@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -55,5 +56,37 @@ public class VehiculoRestController {
                 HttpStatus.CREATED,
                 request
         );
+    }
+
+    @GetMapping("/user/{usuarioId}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<?> getVehiculosByUsuario(
+            @PathVariable Long usuarioId,
+            @RequestParam(defaultValue = "1") int page,
+            @RequestParam(defaultValue = "6") int size,
+            HttpServletRequest request
+    ) {
+        Optional<User> foundUser = userRepository.findById(usuarioId);
+        if(foundUser.isPresent()) {
+            Pageable pageable = PageRequest.of(page-1, size, Sort.by(Sort.Direction.DESC, "id"));
+            Page<Vehiculo> vehiculosPage = vehiculoRepository.findByUsuarioId(usuarioId, pageable);
+
+            Meta meta = new Meta(request.getMethod(), request.getRequestURL().toString());
+            meta.setTotalPages(vehiculosPage.getTotalPages());
+            meta.setTotalElements(vehiculosPage.getTotalElements());
+            meta.setPageNumber(vehiculosPage.getNumber() + 1);
+            meta.setPageSize(vehiculosPage.getSize());
+
+            return new GlobalResponseHandler().handleResponse(
+                    "Vehículos obtenidos correctamente.",
+                    vehiculosPage.getContent(),
+                    HttpStatus.OK,
+                    meta
+            );
+        }else{
+            return new GlobalResponseHandler().handleResponse("User " + usuarioId + " not found"  ,
+                    HttpStatus.NOT_FOUND, request);
+        }
+
     }
 }
