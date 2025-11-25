@@ -37,9 +37,7 @@ public class UserRestController {
     @Autowired private VehiculoRepository vehiculoRepository;
     @Autowired private LogrosService logrosService;
 
-    // ====================================================================
-    // GET ALL USERS
-    // ====================================================================
+    
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> getAll(
@@ -64,9 +62,7 @@ public class UserRestController {
         );
     }
 
-    // ====================================================================
-    // CREATE USER
-    // ====================================================================
+    
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> addUser(@RequestBody User user, HttpServletRequest request) {
@@ -81,9 +77,7 @@ public class UserRestController {
         );
     }
 
-    // ====================================================================
-    // UPDATE USER BY ADMIN
-    // ====================================================================
+    
     @PutMapping("/{userId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> updateUser(
@@ -118,9 +112,7 @@ public class UserRestController {
         );
     }
 
-    // ====================================================================
-    // ACTIVATE / DEACTIVATE USER
-    // ====================================================================
+    
     @PutMapping("/{userId}/activate")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> activateUser(@PathVariable Long userId, HttpServletRequest request) {
@@ -175,9 +167,7 @@ public class UserRestController {
         );
     }
 
-    // ====================================================================
-    // DELETE USER
-    // ====================================================================
+   
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId, HttpServletRequest request) {
@@ -202,18 +192,14 @@ public class UserRestController {
         );
     }
 
-    // ====================================================================
-    // AUTH USER (ME)
-    // ====================================================================
+
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public User authenticatedUser() {
         return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
     }
 
-    // ====================================================================
-    // PRIVACY
-    // ====================================================================
+   
     public static class PrivacyRequest {
         private String visibility;
         public String getVisibility() { return visibility; }
@@ -254,9 +240,7 @@ public class UserRestController {
         );
     }
 
-    // ====================================================================
-    // PROFILE
-    // ====================================================================
+    
     @GetMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getMyProfile(HttpServletRequest request) {
@@ -292,9 +276,7 @@ public class UserRestController {
         );
     }
 
-    // ====================================================================
-    // PUBLIC USERS
-    // ====================================================================
+    
     @GetMapping("/explore-users")
     public ResponseEntity<?> getPublicUsers(HttpServletRequest request) {
 
@@ -338,19 +320,15 @@ public class UserRestController {
         );
     }
 
-    // ====================================================================
-    // PUBLIC PROFILE
-    // ====================================================================
     @GetMapping("/explore-users/{valor}")
 public ResponseEntity<?> getPublicProfile(
         @PathVariable String valor,
         HttpServletRequest request
 ) {
 
-    // Buscar por username
+
     Optional<User> optional = userRepository.findByUsername(valor);
 
-    // Si no existe por username, buscar por email
     if (optional.isEmpty() && valor.contains("@")) {
         optional = userRepository.findByEmail(valor);
     }
@@ -406,9 +384,7 @@ public ResponseEntity<?> getPublicProfile(
 }
 
 
-    // ====================================================================
-    // PUBLIC DTOs
-    // ====================================================================
+   
     public static class PublicUserResponse {
         public String username;
         public String avatarUrl;

@@ -11,7 +11,7 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, Long> {
 
     Page<Vehiculo> findByUsuarioId(Long usuarioId, Pageable pageable);
 
-    // ⭐ AGREGAR ESTE MÉTODO (soluciona tu error)
+ 
     List<Vehiculo> findByUsuarioId(Long usuarioId);
 
     List<Vehiculo> findByMarcaContainingIgnoreCase(String marca);
