@@ -42,7 +42,7 @@ public class AuthRestController {
         this.authenticationService = authenticationService;
     }
 
-   
+    
     private String generateUniqueUsername(String email) {
         String base = email.split("@")[0].toLowerCase();
         String username = base;
@@ -58,39 +58,25 @@ public class AuthRestController {
 
     
     @PostMapping("/login")
-    public ResponseEntity<LoginResponse> authenticate(@RequestBody User user) {
-        User authenticatedUser = authenticationService.authenticate(user);
-
-        String jwtToken = jwtService.generateToken(authenticatedUser);
-
-        LoginResponse loginResponse = new LoginResponse();
-        loginResponse.setToken(jwtToken);
-        loginResponse.setExpiresIn(jwtService.getExpirationTime());
-
-        Optional<User> foundUser = userRepository.findByEmail(user.getEmail());
-        foundUser.ifPresent(loginResponse::setAuthUser);
-
-        return ResponseEntity.ok(loginResponse);
     public ResponseEntity<?> authenticate(@RequestBody User user) {
         try {
             User authenticatedUser = authenticationService.authenticate(user);
-    
+
             String jwtToken = jwtService.generateToken(authenticatedUser);
-    
+
             LoginResponse loginResponse = new LoginResponse();
             loginResponse.setToken(jwtToken);
             loginResponse.setExpiresIn(jwtService.getExpirationTime());
             loginResponse.setAuthUser(authenticatedUser);
-    
+
             return ResponseEntity.ok(loginResponse);
-    
+
         } catch (RuntimeException ex) {
             return ResponseEntity
                     .status(HttpStatus.UNAUTHORIZED)
                     .body(Map.of("message", ex.getMessage()));
         }
     }
-    
 
     
     @PostMapping("/signup")
@@ -118,7 +104,6 @@ public class AuthRestController {
         return ResponseEntity.ok(savedUser);
     }
 
-   
     @PostMapping("/google")
     public ResponseEntity<LoginResponse> authenticateWithGoogle(@RequestBody Map<String, String> requestBody) {
         try {

@@ -21,33 +21,25 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
-import java.util.Date;
 
-
-
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
 public class UserRestController {
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private VehicleCustomizationService customizationService;
+    @Autowired private VehiculoRepository vehiculoRepository;
+    @Autowired private LogrosService logrosService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-  
-
-@Autowired
-private VehicleCustomizationService customizationService;
-
-@Autowired
-private VehiculoRepository vehiculoRepository;
-
-@Autowired
-private LogrosService logrosService;
-
-
+    // ====================================================================
+    // GET ALL USERS
+    // ====================================================================
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> getAll(
@@ -72,11 +64,15 @@ private LogrosService logrosService;
         );
     }
 
+    // ====================================================================
+    // CREATE USER
+    // ====================================================================
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> addUser(@RequestBody User user, HttpServletRequest request) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+
         return new GlobalResponseHandler().handleResponse(
                 "User created successfully",
                 user,
@@ -85,16 +81,19 @@ private LogrosService logrosService;
         );
     }
 
+    // ====================================================================
+    // UPDATE USER BY ADMIN
+    // ====================================================================
     @PutMapping("/{userId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> updateUser(
             @PathVariable Long userId,
-            @RequestBody User userData,
+            @RequestBody User data,
             HttpServletRequest request) {
 
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optional = userRepository.findById(userId);
 
-        if (optionalUser.isEmpty()) {
+        if (optional.isEmpty()) {
             return new GlobalResponseHandler().handleResponse(
                     "User id " + userId + " not found",
                     null,
@@ -103,31 +102,32 @@ private LogrosService logrosService;
             );
         }
 
-        User existingUser = optionalUser.get();
+        User user = optional.get();
 
-        existingUser.setEmail(userData.getEmail());
-        existingUser.setName(userData.getName());
-        existingUser.setLastname(userData.getLastname());
+        user.setEmail(data.getEmail());
+        user.setName(data.getName());
+        user.setLastname(data.getLastname());
 
-        userRepository.save(existingUser);
+        userRepository.save(user);
 
         return new GlobalResponseHandler().handleResponse(
                 "User updated successfully",
-                existingUser,
+                user,
                 HttpStatus.OK,
                 request
         );
     }
 
+    // ====================================================================
+    // ACTIVATE / DEACTIVATE USER
+    // ====================================================================
     @PutMapping("/{userId}/activate")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
-    public ResponseEntity<?> activateUser(
-            @PathVariable Long userId,
-            HttpServletRequest request) {
+    public ResponseEntity<?> activateUser(@PathVariable Long userId, HttpServletRequest request) {
 
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optional = userRepository.findById(userId);
 
-        if (optionalUser.isEmpty()) {
+        if (optional.isEmpty()) {
             return new GlobalResponseHandler().handleResponse(
                     "User id " + userId + " not found",
                     null,
@@ -136,7 +136,7 @@ private LogrosService logrosService;
             );
         }
 
-        User user = optionalUser.get();
+        User user = optional.get();
         user.setActive(true);
         userRepository.save(user);
 
@@ -150,13 +150,11 @@ private LogrosService logrosService;
 
     @PutMapping("/{userId}/deactivate")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
-    public ResponseEntity<?> deactivateUser(
-            @PathVariable Long userId,
-            HttpServletRequest request) {
+    public ResponseEntity<?> deactivateUser(@PathVariable Long userId, HttpServletRequest request) {
 
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optional = userRepository.findById(userId);
 
-        if (optionalUser.isEmpty()) {
+        if (optional.isEmpty()) {
             return new GlobalResponseHandler().handleResponse(
                     "User id " + userId + " not found",
                     null,
@@ -165,7 +163,7 @@ private LogrosService logrosService;
             );
         }
 
-        User user = optionalUser.get();
+        User user = optional.get();
         user.setActive(false);
         userRepository.save(user);
 
@@ -177,16 +175,20 @@ private LogrosService logrosService;
         );
     }
 
+    // ====================================================================
+    // DELETE USER
+    // ====================================================================
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId, HttpServletRequest request) {
-        Optional<User> foundOrder = userRepository.findById(userId);
 
-        if (foundOrder.isPresent()) {
+        Optional<User> optional = userRepository.findById(userId);
+
+        if (optional.isPresent()) {
             userRepository.deleteById(userId);
             return new GlobalResponseHandler().handleResponse(
                     "User deleted successfully",
-                    foundOrder.get(),
+                    optional.get(),
                     HttpStatus.OK,
                     request
             );
@@ -200,134 +202,85 @@ private LogrosService logrosService;
         );
     }
 
+    // ====================================================================
+    // AUTH USER (ME)
+    // ====================================================================
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public User authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (User) authentication.getPrincipal();
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+    // ====================================================================
+    // PRIVACY
+    // ====================================================================
+    public static class PrivacyRequest {
+        private String visibility;
+        public String getVisibility() { return visibility; }
+        public void setVisibility(String visibility) { this.visibility = visibility; }
     }
 
     @GetMapping("/privacy")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getMyPrivacySetting(HttpServletRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
-
-        return new GlobalResponseHandler().handleResponse(
-                "Ok",
-                user.getVisibility(),
-                HttpStatus.OK,
-                request
-        );
+    public ResponseEntity<?> getMyPrivacy(HttpServletRequest req) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new GlobalResponseHandler().handleResponse("Ok", user.getVisibility(), HttpStatus.OK, req);
     }
 
     @PutMapping("/privacy")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateMyPrivacySetting(
-            @RequestBody PrivacyRequest request,
-            HttpServletRequest httpRequest) {
+    public ResponseEntity<?> updateMyPrivacy(
+            @RequestBody PrivacyRequest body,
+            HttpServletRequest req) {
 
-        if (!"public".equals(request.getVisibility()) && !"private".equals(request.getVisibility())) {
+        if (!"public".equals(body.getVisibility()) && !"private".equals(body.getVisibility())) {
             return new GlobalResponseHandler().handleResponse(
-                    "Valor inválido. Solo se permite 'public' o 'private'.",
+                    "Valor inválido",
                     null,
                     HttpStatus.BAD_REQUEST,
-                    httpRequest
+                    req
             );
         }
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
-
-        user.setVisibility(request.getVisibility());
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        user.setVisibility(body.getVisibility());
         userRepository.save(user);
 
         return new GlobalResponseHandler().handleResponse(
                 "Configuración actualizada correctamente.",
                 user,
                 HttpStatus.OK,
-                httpRequest
+                req
         );
     }
 
-
-   
+    // ====================================================================
+    // PROFILE
+    // ====================================================================
     @GetMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getMyProfile(HttpServletRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
-
-        return new GlobalResponseHandler().handleResponse(
-                "Perfil obtenido correctamente.",
-                user,
-                HttpStatus.OK,
-                request
-        );
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new GlobalResponseHandler().handleResponse("Perfil obtenido correctamente.", user, HttpStatus.OK, request);
     }
 
-    
-   @PutMapping("/profile")
-@PreAuthorize("isAuthenticated()")
-public ResponseEntity<?> updateMyProfile(@RequestBody User updatedData, HttpServletRequest request) {
-    Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-    User principal = (User) auth.getPrincipal();
-
-  
-    User user = userRepository.findByEmail(principal.getEmail())
-            .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-    if (updatedData.getName() != null && !updatedData.getName().isBlank()) {
-        user.setName(updatedData.getName());
-    }
-    if (updatedData.getLastname() != null && !updatedData.getLastname().isBlank()) {
-        user.setLastname(updatedData.getLastname());
-    }
-    if (updatedData.getEmail() != null && !updatedData.getEmail().isBlank()) {
-        user.setEmail(updatedData.getEmail());
-    }
-    if (updatedData.getBio() != null) {
-        user.setBio(updatedData.getBio());
-    }
-
-   if (updatedData.getVisibility() != null && !updatedData.getVisibility().isBlank()) {
-    user.setVisibility(updatedData.getVisibility());
-    }
-
-  
-    if (updatedData.getAvatarUrl() != null && !updatedData.getAvatarUrl().isBlank()) {
-        user.setAvatarUrl(updatedData.getAvatarUrl());
-    }
     @PutMapping("/profile")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateMyProfile(@RequestBody User updatedData, HttpServletRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User principal = (User) auth.getPrincipal();
+    public ResponseEntity<?> updateMyProfile(@RequestBody User data, HttpServletRequest request) {
+
+        User principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         User user = userRepository.findByEmail(principal.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (updatedData.getName() != null && !updatedData.getName().isBlank()) {
-            user.setName(updatedData.getName());
-        }
-        if (updatedData.getLastname() != null && !updatedData.getLastname().isBlank()) {
-            user.setLastname(updatedData.getLastname());
-        }
-        if (updatedData.getEmail() != null && !updatedData.getEmail().isBlank()) {
-            user.setEmail(updatedData.getEmail());
-        }
-        if (updatedData.getBio() != null) {
-            user.setBio(updatedData.getBio());
-        }
-        if (updatedData.getVisibility() != null && !updatedData.getVisibility().isBlank()) {
-            user.setVisibility(updatedData.getVisibility());
-        }
-        if (updatedData.getAvatarUrl() != null && !updatedData.getAvatarUrl().isBlank()) {
-            user.setAvatarUrl(updatedData.getAvatarUrl());
-        }
-        if (updatedData.getPassword() != null && !updatedData.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(updatedData.getPassword()));
-        }
+        if (data.getName() != null) user.setName(data.getName());
+        if (data.getLastname() != null) user.setLastname(data.getLastname());
+        if (data.getEmail() != null) user.setEmail(data.getEmail());
+        if (data.getBio() != null) user.setBio(data.getBio());
+        if (data.getVisibility() != null) user.setVisibility(data.getVisibility());
+        if (data.getAvatarUrl() != null) user.setAvatarUrl(data.getAvatarUrl());
+        if (data.getPassword() != null)
+            user.setPassword(passwordEncoder.encode(data.getPassword()));
 
         userRepository.save(user);
 
@@ -339,58 +292,68 @@ public ResponseEntity<?> updateMyProfile(@RequestBody User updatedData, HttpServ
         );
     }
 
-  
-    public static class PrivacyRequest {
-        private String visibility;
+    // ====================================================================
+    // PUBLIC USERS
+    // ====================================================================
+    @GetMapping("/explore-users")
+    public ResponseEntity<?> getPublicUsers(HttpServletRequest request) {
 
-        public String getVisibility() {
-            return visibility;
-        }
+        List<User> users = userRepository.findAll();
 
-        public void setVisibility(String visibility) {
-            this.visibility = visibility;
-        }
+        var mapped = users.stream().map(u -> {
+
+            Map<String, Object> customizationMap = null;
+
+            try {
+                VehicleCustomization c = customizationService.getCustomizationByUser(u.getId());
+
+                if (c != null) {
+                    customizationMap = new HashMap<>();
+                    customizationMap.put("id", c.getId());
+                    customizationMap.put("modelo", c.getModelo());
+                    customizationMap.put("carroceria", c.getCarroceria());
+                    customizationMap.put("interior", c.getInterior());
+                    customizationMap.put("lucesFront", c.getLucesFront());
+                    customizationMap.put("rines", c.getRines());
+                    customizationMap.put("fechaCreacion", c.getFechaCreacion());
+                    customizationMap.put("fechaActualizacion", c.getFechaActualizacion());
+                }
+
+            } catch (Exception ignored) {}
+
+            return new PublicUserResponse(
+                    u.getUsername(),
+                    u.getAvatarUrl(),
+                    u.getVisibility(),
+                    (u.getCreatedAt() != null ? u.getCreatedAt().toString() : null),
+                    customizationMap
+            );
+        }).toList();
+
+        return new GlobalResponseHandler().handleResponse(
+                "Usuarios encontrados",
+                mapped,
+                HttpStatus.OK,
+                request
+        );
     }
 
-@GetMapping("/explore-users")
-public ResponseEntity<?> getPublicUsers(HttpServletRequest request) {
-
-    var users = userRepository.findAll();
-
-    var mapped = users.stream()
-            .map(u -> {
-
-                Object customization = null;
-                try {
-                    customization = customizationService.getCustomizationByUser(u.getId());
-                } catch (Exception ignored) {}
-
-                return new PublicUserResponse(
-                        u.getUsername(),                   
-                        u.getAvatarUrl(),
-                        u.getVisibility(),
-                        u.getCreatedAt() != null ? u.getCreatedAt().toString() : null,
-                        customization
-                );
-            })
-            .toList();
-
-    return new GlobalResponseHandler().handleResponse(
-            "Usuarios encontrados",
-            mapped,
-            HttpStatus.OK,
-            request
-    );
-}
-
-
-@GetMapping("/explore-users/{username}")
+    // ====================================================================
+    // PUBLIC PROFILE
+    // ====================================================================
+    @GetMapping("/explore-users/{valor}")
 public ResponseEntity<?> getPublicProfile(
-        @PathVariable String username,
+        @PathVariable String valor,
         HttpServletRequest request
 ) {
 
-    Optional<User> optional = userRepository.findByUsername(username);
+    // Buscar por username
+    Optional<User> optional = userRepository.findByUsername(valor);
+
+    // Si no existe por username, buscar por email
+    if (optional.isEmpty() && valor.contains("@")) {
+        optional = userRepository.findByEmail(valor);
+    }
 
     if (optional.isEmpty()) {
         return new GlobalResponseHandler().handleResponse(
@@ -411,20 +374,17 @@ public ResponseEntity<?> getPublicProfile(
         );
     }
 
-
     Object customization = null;
     try {
         customization = customizationService.getCustomizationByUser(user.getId());
     } catch (Exception ignored) {}
 
-
-    var cars = vehiculoRepository.findByUsuarioId(user.getId().intValue());
+    var cars = vehiculoRepository.findByUsuarioId(user.getId());
 
     var logros = logrosService.getUnlockedAchievements(user);
 
-  
     var fullProfile = new FullPublicUserProfile(
-            user.getUsername(),                    
+            user.getUsername(),
             user.getName(),
             user.getLastname(),
             user.getEmail(),
@@ -446,104 +406,53 @@ public ResponseEntity<?> getPublicProfile(
 }
 
 
-public static class PublicUserResponse {
-    public String username;
-    public String avatarUrl;
-    public String visibility;
-    public String createdAt;
-    public Object customization;
-
-    public PublicUserResponse(
-            String username,
-            String avatarUrl,
-            String visibility,
-            String createdAt,
-            Object customization
-    ) {
-        this.username = username;
-        this.avatarUrl = avatarUrl;
-        this.visibility = visibility;
-        this.createdAt = createdAt;
-        this.customization = customization;
+    // ====================================================================
+    // PUBLIC DTOs
+    // ====================================================================
+    public static class PublicUserResponse {
+        public String username;
+        public String avatarUrl;
+        public String visibility;
+        public String createdAt;
+        public Object customization;
+        public PublicUserResponse(String username, String avatarUrl, String visibility, String createdAt, Object customization) {
+            this.username = username;
+            this.avatarUrl = avatarUrl;
+            this.visibility = visibility;
+            this.createdAt = createdAt;
+            this.customization = customization;
+        }
     }
-}
 
+    public static class FullPublicUserProfile {
+        public String username, name, lastname, email, avatarUrl, visibility, bio, createdAt;
+        public Object customization, cars, logros;
 
-public static class FullPublicUserProfile {
-
-    public String username;       
-    public String name;
-    public String lastname;
-    public String email;
-    public String avatarUrl;
-    public String visibility;
-    public String bio;
-    public String createdAt;
-
-    public Object customization;
-    public Object cars;
-    public Object logros;
-
-    public FullPublicUserProfile(
-            String username,      
-            String name,
-            String lastname,
-            String email,
-            String avatarUrl,
-            String visibility,
-            String bio,
-            String createdAt,
-            Object customization,
-            Object cars,
-            Object logros
-    ) {
-        this.username = username;   
-        this.name = name;
-        this.lastname = lastname;
-        this.email = email;
-        this.avatarUrl = avatarUrl;
-        this.visibility = visibility;
-        this.bio = bio;
-        this.createdAt = createdAt;
-        this.customization = customization;
-        this.cars = cars;
-        this.logros = logros;
+        public FullPublicUserProfile(String username, String name, String lastname, String email,
+                                     String avatarUrl, String visibility, String bio, String createdAt,
+                                     Object customization, Object cars, Object logros) {
+            this.username = username;
+            this.name = name;
+            this.lastname = lastname;
+            this.email = email;
+            this.avatarUrl = avatarUrl;
+            this.visibility = visibility;
+            this.bio = bio;
+            this.createdAt = createdAt;
+            this.customization = customization;
+            this.cars = cars;
+            this.logros = logros;
+        }
     }
-}
 
-public static class PublicProfileResponse {
-    public boolean allowed;
-    public Object profile;
+    public static class PublicProfileResponse {
+        public boolean allowed;
+        public Object profile;
 
-    public PublicProfileResponse(boolean allowed, Object profile) {
-        this.allowed = allowed;
-        this.profile = profile;
+        public PublicProfileResponse(boolean allowed, Object profile) {
+            this.allowed = allowed;
+            this.profile = profile;
+        }
     }
-    @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
-    public ResponseEntity<?> searchUsers(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Boolean active,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            HttpServletRequest request) {
-
-        Pageable pageable = PageRequest.of(page - 1, size);
-        Page<User> usersPage = userRepository.searchUsers(name, email, active, pageable);
-
-        Meta meta = new Meta(request.getMethod(), request.getRequestURL().toString());
-        meta.setTotalPages(usersPage.getTotalPages());
-        meta.setTotalElements(usersPage.getTotalElements());
-        meta.setPageNumber(usersPage.getNumber() + 1);
-        meta.setPageSize(usersPage.getSize());
-
-        return new GlobalResponseHandler().handleResponse(
-                "Users retrieved successfully by filters",
-                usersPage.getContent(),
-                HttpStatus.OK,
-                meta
-        );
-    }
-}
+    
 }

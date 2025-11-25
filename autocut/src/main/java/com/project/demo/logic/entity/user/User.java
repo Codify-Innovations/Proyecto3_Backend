@@ -41,9 +41,6 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private boolean active = true;
 
-    @Column(length = 200)
-    private String bio; 
-
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;
@@ -61,7 +58,9 @@ public class User implements UserDetails {
 
     public User() {}
 
-  
+    // =============================
+    // UserDetails implementation
+    // =============================
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority =
@@ -70,45 +69,28 @@ public class User implements UserDetails {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() {
-        return this.active;
-    }    
+    public boolean isEnabled() { return this.active; }
 
     @Override
     public String getUsername() {
         return this.email;
     }
 
-    @Override public boolean isAccountNonExpired() { return true; }
-    @Override public boolean isAccountNonLocked() { return true; }
-    @Override public boolean isCredentialsNonExpired() { return true; }
-    @Override public boolean isEnabled() { return true; }
-
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        SimpleGrantedAuthority authority =
-                new SimpleGrantedAuthority("ROLE_" + role.getName().toString());
-        return List.of(authority);
-    }
-
-
+    // =============================
+    // Getters / Setters
+    // =============================
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
+
     public String getPublicUsername() { return username; }
     public void setUsername(String username) { this.username = username; }
 
@@ -117,29 +99,22 @@ public class User implements UserDetails {
 
     public String getLastname() { return lastname; }
     public void setLastname(String lastname) { this.lastname = lastname; }
-    public boolean isActive() {
-        return active;
-    }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 
-    public String getBio() {
-        return bio;
-    }
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
 
     public String getEmail() { return email; }
     public void setEmail(String email) { this.email = email; }
 
-    @Override public String getPassword() { return password; }
+    @Override
+    public String getPassword() { return password; }
     public void setPassword(String password) { this.password = password; }
 
     public String getVisibility() { return visibility; }
     public void setVisibility(String visibility) { this.visibility = visibility; }
-
-    public String getBio() { return bio; }
-    public void setBio(String bio) { this.bio = bio; }
 
     public String getAvatarUrl() { return avatarUrl; }
     public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
