@@ -58,6 +58,19 @@ public class AuthRestController {
 
     
     @PostMapping("/login")
+    public ResponseEntity<LoginResponse> authenticate(@RequestBody User user) {
+        User authenticatedUser = authenticationService.authenticate(user);
+
+        String jwtToken = jwtService.generateToken(authenticatedUser);
+
+        LoginResponse loginResponse = new LoginResponse();
+        loginResponse.setToken(jwtToken);
+        loginResponse.setExpiresIn(jwtService.getExpirationTime());
+
+        Optional<User> foundUser = userRepository.findByEmail(user.getEmail());
+        foundUser.ifPresent(loginResponse::setAuthUser);
+
+        return ResponseEntity.ok(loginResponse);
     public ResponseEntity<?> authenticate(@RequestBody User user) {
         try {
             User authenticatedUser = authenticationService.authenticate(user);
