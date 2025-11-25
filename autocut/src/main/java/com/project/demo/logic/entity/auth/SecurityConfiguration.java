@@ -31,6 +31,8 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests((authorize) -> authorize
                         .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
+                        .requestMatchers("/api/files/**").permitAll() 
+                        .requestMatchers("/api/vehiculos/**").permitAll() 
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/api/vehiculos/**").permitAll()
                         .anyRequest().authenticated()

@@ -8,7 +8,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.List;
 
 public interface VehiculoRepository extends JpaRepository<Vehiculo, Long> {
+
     Page<Vehiculo> findByUsuarioId(Long usuarioId, Pageable pageable);
+
+ 
+    List<Vehiculo> findByUsuarioId(Long usuarioId);
+
     List<Vehiculo> findByMarcaContainingIgnoreCase(String marca);
     List<Vehiculo> findByModeloContainingIgnoreCase(String modelo);
 
@@ -18,3 +23,4 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, Long> {
 
     long countByUsuarioIdAndMarca(Long usuarioId, String marca);
 }
+

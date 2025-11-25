@@ -2,8 +2,13 @@ package com.project.demo.rest.user;
 
 import com.project.demo.logic.entity.http.GlobalResponseHandler;
 import com.project.demo.logic.entity.http.Meta;
+import com.project.demo.logic.entity.services.logros.LogrosService;
 import com.project.demo.logic.entity.user.User;
 import com.project.demo.logic.entity.user.UserRepository;
+import com.project.demo.logic.entity.vehicle.VehicleCustomization;
+import com.project.demo.logic.entity.vehicle.VehicleCustomizationService;
+import com.project.demo.logic.entity.vehiculo.VehiculoRepository;
+
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -17,18 +22,22 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @RestController
 @RequestMapping("/users")
 public class UserRestController {
 
-    @Autowired
-    private UserRepository userRepository;
+    @Autowired private UserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+    @Autowired private VehicleCustomizationService customizationService;
+    @Autowired private VehiculoRepository vehiculoRepository;
+    @Autowired private LogrosService logrosService;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-
+    
     @GetMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> getAll(
@@ -53,11 +62,13 @@ public class UserRestController {
         );
     }
 
+    
     @PostMapping
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> addUser(@RequestBody User user, HttpServletRequest request) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
+
         return new GlobalResponseHandler().handleResponse(
                 "User created successfully",
                 user,
@@ -66,16 +77,17 @@ public class UserRestController {
         );
     }
 
+    
     @PutMapping("/{userId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> updateUser(
             @PathVariable Long userId,
-            @RequestBody User userData,
+            @RequestBody User data,
             HttpServletRequest request) {
 
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optional = userRepository.findById(userId);
 
-        if (optionalUser.isEmpty()) {
+        if (optional.isEmpty()) {
             return new GlobalResponseHandler().handleResponse(
                     "User id " + userId + " not found",
                     null,
@@ -84,31 +96,30 @@ public class UserRestController {
             );
         }
 
-        User existingUser = optionalUser.get();
+        User user = optional.get();
 
-        existingUser.setEmail(userData.getEmail());
-        existingUser.setName(userData.getName());
-        existingUser.setLastname(userData.getLastname());
+        user.setEmail(data.getEmail());
+        user.setName(data.getName());
+        user.setLastname(data.getLastname());
 
-        userRepository.save(existingUser);
+        userRepository.save(user);
 
         return new GlobalResponseHandler().handleResponse(
                 "User updated successfully",
-                existingUser,
+                user,
                 HttpStatus.OK,
                 request
         );
     }
 
+    
     @PutMapping("/{userId}/activate")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
-    public ResponseEntity<?> activateUser(
-            @PathVariable Long userId,
-            HttpServletRequest request) {
+    public ResponseEntity<?> activateUser(@PathVariable Long userId, HttpServletRequest request) {
 
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optional = userRepository.findById(userId);
 
-        if (optionalUser.isEmpty()) {
+        if (optional.isEmpty()) {
             return new GlobalResponseHandler().handleResponse(
                     "User id " + userId + " not found",
                     null,
@@ -117,7 +128,7 @@ public class UserRestController {
             );
         }
 
-        User user = optionalUser.get();
+        User user = optional.get();
         user.setActive(true);
         userRepository.save(user);
 
@@ -131,13 +142,11 @@ public class UserRestController {
 
     @PutMapping("/{userId}/deactivate")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
-    public ResponseEntity<?> deactivateUser(
-            @PathVariable Long userId,
-            HttpServletRequest request) {
+    public ResponseEntity<?> deactivateUser(@PathVariable Long userId, HttpServletRequest request) {
 
-        Optional<User> optionalUser = userRepository.findById(userId);
+        Optional<User> optional = userRepository.findById(userId);
 
-        if (optionalUser.isEmpty()) {
+        if (optional.isEmpty()) {
             return new GlobalResponseHandler().handleResponse(
                     "User id " + userId + " not found",
                     null,
@@ -146,7 +155,7 @@ public class UserRestController {
             );
         }
 
-        User user = optionalUser.get();
+        User user = optional.get();
         user.setActive(false);
         userRepository.save(user);
 
@@ -158,16 +167,18 @@ public class UserRestController {
         );
     }
 
+   
     @DeleteMapping("/{userId}")
     @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> deleteUser(@PathVariable Long userId, HttpServletRequest request) {
-        Optional<User> foundOrder = userRepository.findById(userId);
 
-        if (foundOrder.isPresent()) {
+        Optional<User> optional = userRepository.findById(userId);
+
+        if (optional.isPresent()) {
             userRepository.deleteById(userId);
             return new GlobalResponseHandler().handleResponse(
                     "User deleted successfully",
-                    foundOrder.get(),
+                    optional.get(),
                     HttpStatus.OK,
                     request
             );
@@ -181,100 +192,79 @@ public class UserRestController {
         );
     }
 
+
     @GetMapping("/me")
     @PreAuthorize("isAuthenticated()")
     public User authenticatedUser() {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        return (User) authentication.getPrincipal();
+        return (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+    }
+
+   
+    public static class PrivacyRequest {
+        private String visibility;
+        public String getVisibility() { return visibility; }
+        public void setVisibility(String visibility) { this.visibility = visibility; }
     }
 
     @GetMapping("/privacy")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getMyPrivacySetting(HttpServletRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
-
-        return new GlobalResponseHandler().handleResponse(
-                "Ok",
-                user.getVisibility(),
-                HttpStatus.OK,
-                request
-        );
+    public ResponseEntity<?> getMyPrivacy(HttpServletRequest req) {
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new GlobalResponseHandler().handleResponse("Ok", user.getVisibility(), HttpStatus.OK, req);
     }
 
     @PutMapping("/privacy")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateMyPrivacySetting(
-            @RequestBody PrivacyRequest request,
-            HttpServletRequest httpRequest) {
+    public ResponseEntity<?> updateMyPrivacy(
+            @RequestBody PrivacyRequest body,
+            HttpServletRequest req) {
 
-        if (!"public".equals(request.getVisibility()) && !"private".equals(request.getVisibility())) {
+        if (!"public".equals(body.getVisibility()) && !"private".equals(body.getVisibility())) {
             return new GlobalResponseHandler().handleResponse(
-                    "Valor inválido. Solo se permite 'public' o 'private'.",
+                    "Valor inválido",
                     null,
                     HttpStatus.BAD_REQUEST,
-                    httpRequest
+                    req
             );
         }
 
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
-
-        user.setVisibility(request.getVisibility());
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        user.setVisibility(body.getVisibility());
         userRepository.save(user);
 
         return new GlobalResponseHandler().handleResponse(
                 "Configuración actualizada correctamente.",
                 user,
                 HttpStatus.OK,
-                httpRequest
+                req
         );
     }
 
+    
     @GetMapping("/profile")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<?> getMyProfile(HttpServletRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User user = (User) auth.getPrincipal();
-
-        return new GlobalResponseHandler().handleResponse(
-                "Perfil obtenido correctamente.",
-                user,
-                HttpStatus.OK,
-                request
-        );
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        return new GlobalResponseHandler().handleResponse("Perfil obtenido correctamente.", user, HttpStatus.OK, request);
     }
 
     @PutMapping("/profile")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> updateMyProfile(@RequestBody User updatedData, HttpServletRequest request) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User principal = (User) auth.getPrincipal();
+    public ResponseEntity<?> updateMyProfile(@RequestBody User data, HttpServletRequest request) {
+
+        User principal = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         User user = userRepository.findByEmail(principal.getEmail())
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
-        if (updatedData.getName() != null && !updatedData.getName().isBlank()) {
-            user.setName(updatedData.getName());
-        }
-        if (updatedData.getLastname() != null && !updatedData.getLastname().isBlank()) {
-            user.setLastname(updatedData.getLastname());
-        }
-        if (updatedData.getEmail() != null && !updatedData.getEmail().isBlank()) {
-            user.setEmail(updatedData.getEmail());
-        }
-        if (updatedData.getBio() != null) {
-            user.setBio(updatedData.getBio());
-        }
-        if (updatedData.getVisibility() != null && !updatedData.getVisibility().isBlank()) {
-            user.setVisibility(updatedData.getVisibility());
-        }
-        if (updatedData.getAvatarUrl() != null && !updatedData.getAvatarUrl().isBlank()) {
-            user.setAvatarUrl(updatedData.getAvatarUrl());
-        }
-        if (updatedData.getPassword() != null && !updatedData.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(updatedData.getPassword()));
-        }
+        if (data.getName() != null) user.setName(data.getName());
+        if (data.getLastname() != null) user.setLastname(data.getLastname());
+        if (data.getEmail() != null) user.setEmail(data.getEmail());
+        if (data.getBio() != null) user.setBio(data.getBio());
+        if (data.getVisibility() != null) user.setVisibility(data.getVisibility());
+        if (data.getAvatarUrl() != null) user.setAvatarUrl(data.getAvatarUrl());
+        if (data.getPassword() != null)
+            user.setPassword(passwordEncoder.encode(data.getPassword()));
 
         userRepository.save(user);
 
@@ -286,42 +276,159 @@ public class UserRestController {
         );
     }
 
-    public static class PrivacyRequest {
-        private String visibility;
+    
+    @GetMapping("/explore-users")
+    public ResponseEntity<?> getPublicUsers(HttpServletRequest request) {
 
-        public String getVisibility() {
-            return visibility;
-        }
+        List<User> users = userRepository.findAll();
 
-        public void setVisibility(String visibility) {
-            this.visibility = visibility;
-        }
-    }
+        var mapped = users.stream().map(u -> {
 
-    @GetMapping("/search")
-    @PreAuthorize("hasAnyRole('SUPER_ADMIN_ROLE')")
-    public ResponseEntity<?> searchUsers(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String email,
-            @RequestParam(required = false) Boolean active,
-            @RequestParam(defaultValue = "1") int page,
-            @RequestParam(defaultValue = "10") int size,
-            HttpServletRequest request) {
+            Map<String, Object> customizationMap = null;
 
-        Pageable pageable = PageRequest.of(page - 1, size);
-        Page<User> usersPage = userRepository.searchUsers(name, email, active, pageable);
+            try {
+                VehicleCustomization c = customizationService.getCustomizationByUser(u.getId());
 
-        Meta meta = new Meta(request.getMethod(), request.getRequestURL().toString());
-        meta.setTotalPages(usersPage.getTotalPages());
-        meta.setTotalElements(usersPage.getTotalElements());
-        meta.setPageNumber(usersPage.getNumber() + 1);
-        meta.setPageSize(usersPage.getSize());
+                if (c != null) {
+                    customizationMap = new HashMap<>();
+                    customizationMap.put("id", c.getId());
+                    customizationMap.put("modelo", c.getModelo());
+                    customizationMap.put("carroceria", c.getCarroceria());
+                    customizationMap.put("interior", c.getInterior());
+                    customizationMap.put("lucesFront", c.getLucesFront());
+                    customizationMap.put("rines", c.getRines());
+                    customizationMap.put("fechaCreacion", c.getFechaCreacion());
+                    customizationMap.put("fechaActualizacion", c.getFechaActualizacion());
+                }
+
+            } catch (Exception ignored) {}
+
+            return new PublicUserResponse(
+                    u.getUsername(),
+                    u.getAvatarUrl(),
+                    u.getVisibility(),
+                    (u.getCreatedAt() != null ? u.getCreatedAt().toString() : null),
+                    customizationMap
+            );
+        }).toList();
 
         return new GlobalResponseHandler().handleResponse(
-                "Users retrieved successfully by filters",
-                usersPage.getContent(),
+                "Usuarios encontrados",
+                mapped,
                 HttpStatus.OK,
-                meta
+                request
         );
     }
+
+    @GetMapping("/explore-users/{valor}")
+public ResponseEntity<?> getPublicProfile(
+        @PathVariable String valor,
+        HttpServletRequest request
+) {
+
+
+    Optional<User> optional = userRepository.findByUsername(valor);
+
+    if (optional.isEmpty() && valor.contains("@")) {
+        optional = userRepository.findByEmail(valor);
+    }
+
+    if (optional.isEmpty()) {
+        return new GlobalResponseHandler().handleResponse(
+                "Usuario no encontrado",
+                HttpStatus.NOT_FOUND,
+                request
+        );
+    }
+
+    User user = optional.get();
+
+    if ("private".equalsIgnoreCase(user.getVisibility())) {
+        return new GlobalResponseHandler().handleResponse(
+                "Perfil privado",
+                new PublicProfileResponse(false, null),
+                HttpStatus.OK,
+                request
+        );
+    }
+
+    Object customization = null;
+    try {
+        customization = customizationService.getCustomizationByUser(user.getId());
+    } catch (Exception ignored) {}
+
+    var cars = vehiculoRepository.findByUsuarioId(user.getId());
+
+    var logros = logrosService.getUnlockedAchievements(user);
+
+    var fullProfile = new FullPublicUserProfile(
+            user.getUsername(),
+            user.getName(),
+            user.getLastname(),
+            user.getEmail(),
+            user.getAvatarUrl(),
+            user.getVisibility(),
+            user.getBio(),
+            user.getCreatedAt() != null ? user.getCreatedAt().toString() : null,
+            customization,
+            cars,
+            logros
+    );
+
+    return new GlobalResponseHandler().handleResponse(
+            "Perfil público cargado correctamente",
+            new PublicProfileResponse(true, fullProfile),
+            HttpStatus.OK,
+            request
+    );
+}
+
+
+   
+    public static class PublicUserResponse {
+        public String username;
+        public String avatarUrl;
+        public String visibility;
+        public String createdAt;
+        public Object customization;
+        public PublicUserResponse(String username, String avatarUrl, String visibility, String createdAt, Object customization) {
+            this.username = username;
+            this.avatarUrl = avatarUrl;
+            this.visibility = visibility;
+            this.createdAt = createdAt;
+            this.customization = customization;
+        }
+    }
+
+    public static class FullPublicUserProfile {
+        public String username, name, lastname, email, avatarUrl, visibility, bio, createdAt;
+        public Object customization, cars, logros;
+
+        public FullPublicUserProfile(String username, String name, String lastname, String email,
+                                     String avatarUrl, String visibility, String bio, String createdAt,
+                                     Object customization, Object cars, Object logros) {
+            this.username = username;
+            this.name = name;
+            this.lastname = lastname;
+            this.email = email;
+            this.avatarUrl = avatarUrl;
+            this.visibility = visibility;
+            this.bio = bio;
+            this.createdAt = createdAt;
+            this.customization = customization;
+            this.cars = cars;
+            this.logros = logros;
+        }
+    }
+
+    public static class PublicProfileResponse {
+        public boolean allowed;
+        public Object profile;
+
+        public PublicProfileResponse(boolean allowed, Object profile) {
+            this.allowed = allowed;
+            this.profile = profile;
+        }
+    }
+    
 }

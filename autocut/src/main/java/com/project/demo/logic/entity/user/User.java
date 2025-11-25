@@ -1,7 +1,5 @@
 package com.project.demo.logic.entity.user;
 
-//import com.project.demo.logic.entity.car.Car;
-//import com.project.demo.logic.entity.order.Order;
 import com.project.demo.logic.entity.rol.Role;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
@@ -22,6 +20,9 @@ public class User implements UserDetails {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true, nullable = false, length = 50)
+    private String username;
+
     private String name;
     private String lastname;
 
@@ -34,11 +35,11 @@ public class User implements UserDetails {
     @Column(nullable = false, length = 10)
     private String visibility = "public";
 
+    @Column(length = 200)
+    private String bio;
+
     @Column(nullable = false)
     private boolean active = true;
-
-    @Column(length = 200)
-    private String bio; 
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
@@ -52,30 +53,14 @@ public class User implements UserDetails {
     @JoinColumn(name = "role_id", referencedColumnName = "id", nullable = false)
     private Role role;
 
+    @Column(length = 500)
+    private String avatarUrl;
 
-@Column(length = 500)
-private String avatarUrl; // URL del avatar o imagen de perfil
-
-public String getAvatarUrl() {
-    return avatarUrl;
-}
-
-public void setAvatarUrl(String avatarUrl) {
-    this.avatarUrl = avatarUrl;
-}
-
-
-
-    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    // private List<Order> orders;
-    //
-    // @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
-    // private List<Car> cars;
-
-  
     public User() {}
 
-  
+    // =============================
+    // UserDetails implementation
+    // =============================
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         SimpleGrantedAuthority authority =
@@ -84,119 +69,62 @@ public void setAvatarUrl(String avatarUrl) {
     }
 
     @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
+    public boolean isAccountNonExpired() { return true; }
 
     @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
+    public boolean isAccountNonLocked() { return true; }
 
     @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
+    public boolean isCredentialsNonExpired() { return true; }
 
     @Override
-    public boolean isEnabled() {
-        return this.active;
-    }    
+    public boolean isEnabled() { return this.active; }
 
     @Override
     public String getUsername() {
-        return email;
+        return this.email;
     }
 
-   
-    public Long getId() {
-        return id;
-    }
+    // =============================
+    // Getters / Setters
+    // =============================
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
+    public String getPublicUsername() { return username; }
+    public void setUsername(String username) { this.username = username; }
 
-    public String getName() {
-        return name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getLastname() { return lastname; }
+    public void setLastname(String lastname) { this.lastname = lastname; }
 
-    public String getLastname() {
-        return lastname;
-    }
+    public boolean isActive() { return active; }
+    public void setActive(boolean active) { this.active = active; }
 
-    public void setLastname(String lastname) {
-        this.lastname = lastname;
-    }
+    public String getBio() { return bio; }
+    public void setBio(String bio) { this.bio = bio; }
 
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
+    public String getEmail() { return email; }
+    public void setEmail(String email) { this.email = email; }
 
     @Override
-    public String getPassword() {
-        return password;
-    }
+    public String getPassword() { return password; }
+    public void setPassword(String password) { this.password = password; }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
+    public String getVisibility() { return visibility; }
+    public void setVisibility(String visibility) { this.visibility = visibility; }
 
- 
-    public String getVisibility() {
-        return visibility;
-    }
+    public String getAvatarUrl() { return avatarUrl; }
+    public void setAvatarUrl(String avatarUrl) { this.avatarUrl = avatarUrl; }
 
-    public void setVisibility(String visibility) {
-        this.visibility = visibility;
-    }
+    public Date getCreatedAt() { return createdAt; }
+    public void setCreatedAt(Date createdAt) { this.createdAt = createdAt; }
 
-    public boolean isActive() {
-        return active;
-    }
+    public Date getUpdatedAt() { return updatedAt; }
+    public void setUpdatedAt(Date updatedAt) { this.updatedAt = updatedAt; }
 
-    public void setActive(boolean active) {
-        this.active = active;
-    }
-
-    public String getBio() {
-        return bio;
-    }
-
-    public void setBio(String bio) {
-        this.bio = bio;
-    }
-
-    public Date getCreatedAt() {
-        return createdAt;
-    }
-
-    public void setCreatedAt(Date createdAt) {
-        this.createdAt = createdAt;
-    }
-
-    public Date getUpdatedAt() {
-        return updatedAt;
-    }
-
-    public void setUpdatedAt(Date updatedAt) {
-        this.updatedAt = updatedAt;
-    }
-
-    public Role getRole() {
-        return role;
-    }
-
-    public User setRole(Role role) {
-        this.role = role;
-        return this;
-    }
+    public Role getRole() { return role; }
+    public User setRole(Role role) { this.role = role; return this; }
 }

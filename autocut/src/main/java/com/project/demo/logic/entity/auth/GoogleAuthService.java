@@ -54,7 +54,6 @@ public class GoogleAuthService {
             return existingUser.get();
         }
 
-        // Si no existe, crear usuario nuevo
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setName(name);
