@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @RestController
@@ -46,6 +47,7 @@ public class VehiculoRestController {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado."));
 
         vehiculo.setUsuario(usuario);
+        vehiculo.setCreatedAt(LocalDateTime.now());
         vehiculoRepository.save(vehiculo);
 
         logrosService.evaluateAchievementsForUser(usuario);
