@@ -1,5 +1,6 @@
-package com.project.demo.logic.entity.media;
+package com.project.demo.rest.media;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +17,9 @@ public class MediaController {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    @Value("${python.api.url}")
+    private String pythonApiUrl;
+
     @PostMapping("/analyze")
     public ResponseEntity<?> analyze(@RequestParam("file") MultipartFile file) {
         try {
@@ -30,21 +34,20 @@ public class MediaController {
                 return ResponseEntity.badRequest().body("Formato no soportado.");
             }
 
-            String pythonApiUrl = "http://127.0.0.1:8000/api/analyze";
-
-
             File tempFile = File.createTempFile("upload-", file.getOriginalFilename());
             file.transferTo(tempFile);
+
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("file", new FileSystemResource(tempFile));
 
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
 
-            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+            HttpEntity<MultiValueMap<String, Object>> requestEntity =
+                    new HttpEntity<>(body, headers);
 
             ResponseEntity<Object> response = restTemplate.exchange(
-                    pythonApiUrl,
+                    pythonApiUrl,              // <-- ya no está quemada
                     HttpMethod.POST,
                     requestEntity,
                     Object.class
@@ -54,7 +57,8 @@ public class MediaController {
 
         } catch (Exception e) {
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body("Error procesando el análisis: " + e.getMessage());
+            return ResponseEntity.internalServerError()
+                    .body("Error procesando el análisis: " + e.getMessage());
         }
     }
 }
