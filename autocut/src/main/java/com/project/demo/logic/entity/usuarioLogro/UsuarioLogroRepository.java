@@ -23,4 +23,5 @@ public interface UsuarioLogroRepository extends JpaRepository<UsuarioLogro, Long
 
     List<UsuarioLogro> findByUsuarioIdAndFechaDesbloqueoBetween(Long userId, LocalDateTime start, LocalDateTime end);
 
+    long countByFechaDesbloqueoBetween(LocalDateTime start, LocalDateTime end);
 }

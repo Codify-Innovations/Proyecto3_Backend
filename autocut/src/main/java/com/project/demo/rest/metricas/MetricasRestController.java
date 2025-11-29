@@ -1,7 +1,6 @@
 package com.project.demo.rest.metricas;
 
 import com.project.demo.logic.entity.http.GlobalResponseHandler;
-import com.project.demo.logic.entity.http.Meta;
 import com.project.demo.logic.entity.services.metricas.MetricasService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,4 +62,31 @@ public class MetricasRestController {
                 request
         );
     }
+
+    // Métricas globales del administrador
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('SUPER_ADMIN_ROLE')")
+    public ResponseEntity<?> getAdminMetrics(
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
+            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end,
+            HttpServletRequest request
+    ) {
+        if (end.isBefore(start)) {
+            return new GlobalResponseHandler().handleResponse(
+                    "La fecha final no puede ser menor que la fecha inicial.",
+                    HttpStatus.BAD_REQUEST,
+                    request
+            );
+        }
+
+        var result = metricasService.getAdminMetrics(start, end);
+
+        return new GlobalResponseHandler().handleResponse(
+                "Métricas globales del administrador obtenidas correctamente.",
+                result,
+                HttpStatus.OK,
+                request
+        );
+    }
+
 }

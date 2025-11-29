@@ -11,4 +11,5 @@ public interface VideoGeneradoIARepository extends JpaRepository<VideoGeneradoIA
 
     List<VideoGeneradoIA> findByUsuarioIdAndCreatedAtBetween(Long userId, LocalDateTime start, LocalDateTime end);
 
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 }
