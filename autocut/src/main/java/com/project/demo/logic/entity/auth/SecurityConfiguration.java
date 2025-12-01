@@ -35,6 +35,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/vehiculos/**").permitAll() 
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/api/vehiculos/**").permitAll()
+                        .requestMatchers("/api/reportes/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement()

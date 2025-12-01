@@ -9,4 +9,6 @@ public interface MetricasService {
     Map<String, Object> getMetricsByDateRange(Long userId, LocalDate start, LocalDate end);
 
     AdminMetricasDTO getAdminMetrics(LocalDate start, LocalDate end);
+
+    AdminMetricasDTO getAdminMetricsGlobal();
 }

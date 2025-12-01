@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"/>
+
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 32px;
+            color: #333;
+        }
+
+        h1 {
+            color: #880e0e;
+            border-bottom: 2px solid #880e0e;
+            padding-bottom: 8px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 24px;
+        }
+
+        table, th, td {
+            border: 1px solid #bbb;
+        }
+
+        th {
+            background: #f3d4d4;
+            padding: 10px;
+            text-align: left;
+        }
+
+        td {
+            padding: 8px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>Reporte Administrativo AutoCut</h1>
+
+<p>
+    Generado el:
+    <span th:text="${fecha}"></span>
+</p>
+
+<p th:if="${fechaInicio != null}">
+    Rango del reporte:
+    <strong th:text="${fechaInicio}"></strong>
+    -
+    <strong th:text="${fechaFin}"></strong>
+</p>
+
+
+<table>
+    <tr>
+        <th>Métrica</th>
+        <th>Valor</th>
+    </tr>
+
+    <tr>
+        <td>Total Videos Generados</td>
+        <td th:text="${videos}"></td>
+    </tr>
+
+    <tr>
+        <td>Total Vehículos Detectados</td>
+        <td th:text="${vehiculos}"></td>
+    </tr>
+
+    <tr>
+        <td>Total Análisis IA</td>
+        <td th:text="${analisis}"></td>
+    </tr>
+
+    <tr>
+        <td>Total Logros Obtenidos</td>
+        <td th:text="${logros}"></td>
+    </tr>
+
+    <tr>
+        <td>Nuevos Usuarios</td>
+        <td th:text="${nuevosUsuarios}"></td>
+    </tr>
+
+    <tr>
+        <td>Usuarios Activos</td>
+        <td th:text="${activos}"></td>
+    </tr>
+
+    <tr>
+        <td>Usuarios Inactivos</td>
+        <td th:text="${inactivos}"></td>
+    </tr>
+
+</table>
+
+</body>
+</html>

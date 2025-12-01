@@ -86,4 +86,26 @@ public class MetricasServiceImpl implements MetricasService {
         );
     }
 
+    @Override
+    public AdminMetricasDTO getAdminMetricsGlobal() {
+
+        long totalVideos = videoGeneradoIARepository.count();
+        long totalVehiculos = vehiculoRepository.count();
+        long totalAnalisis = contenidoAnalizadoIARepository.count();
+        long totalLogros = usuarioLogroRepository.count();
+
+        long nuevosUsuarios = userRepository.count();
+        long usuariosActivos = userRepository.countByActiveTrue();
+        long usuariosInactivos = userRepository.countByActiveFalse();
+
+        return new AdminMetricasDTO(
+                totalVideos,
+                totalVehiculos,
+                totalAnalisis,
+                totalLogros,
+                nuevosUsuarios,
+                usuariosActivos,
+                usuariosInactivos
+        );
+    }
 }
