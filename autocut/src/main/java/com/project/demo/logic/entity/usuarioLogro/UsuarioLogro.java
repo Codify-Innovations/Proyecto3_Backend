@@ -25,6 +25,9 @@ public class UsuarioLogro {
     @JoinColumn(name = "logro_id", nullable = false)
     private Logro logro;
 
+    @Column(name = "fecha_desbloqueo")
+    private LocalDateTime fechaDesbloqueo = LocalDateTime.now();
+
     public Long getId() {
         return id;
     }
@@ -57,6 +60,5 @@ public class UsuarioLogro {
         this.fechaDesbloqueo = fechaDesbloqueo;
     }
 
-    @Column(name = "fecha_desbloqueo")
-    private LocalDateTime fechaDesbloqueo = LocalDateTime.now();
+
 }

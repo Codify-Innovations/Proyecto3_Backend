@@ -44,6 +44,7 @@ public class SecurityConfiguration {
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/api/vehiculos/**").permitAll()
                         .requestMatchers("/users/explore-users").permitAll()  // 🔥 Permitir tu endpoint público
+                        .requestMatchers("/api/reportes/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement()
