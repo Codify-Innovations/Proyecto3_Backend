@@ -4,6 +4,7 @@ import com.project.demo.logic.entity.user.User;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "vehiculos")
@@ -39,6 +40,16 @@ public class Vehiculo {
 
     @Column(length = 50, nullable = false)
     private String color;
+
+    private LocalDateTime createdAt;
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
 
     public String getColor() {
         return color;
