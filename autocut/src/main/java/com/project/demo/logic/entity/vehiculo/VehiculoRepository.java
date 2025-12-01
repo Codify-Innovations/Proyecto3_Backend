@@ -26,5 +26,7 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, Long> {
     long countByUsuarioIdAndMarca(Long usuarioId, String marca);
 
     List<Vehiculo> findByUsuarioIdAndCreatedAtBetween(Long userId, LocalDateTime start, LocalDateTime end);
+
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 }
 

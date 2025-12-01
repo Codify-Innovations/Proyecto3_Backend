@@ -15,4 +15,6 @@ public interface ContenidoAnalizadoIARepository extends JpaRepository<ContenidoA
 
     List<ContenidoAnalizadoIA> findByUsuarioIdAndCreatedAtBetween(Long userId, LocalDateTime start, LocalDateTime end);
 
+    long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
+
 }

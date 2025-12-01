@@ -1,7 +1,6 @@
 package com.project.demo.rest.metricas;
 
 import com.project.demo.logic.entity.http.GlobalResponseHandler;
-import com.project.demo.logic.entity.http.Meta;
 import com.project.demo.logic.entity.services.metricas.MetricasService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -23,44 +22,45 @@ public class MetricasRestController {
     // Summary general
     @GetMapping("/user/{userId}/summary")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getSummary(
-            @PathVariable Long userId,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<?> getSummary(@PathVariable Long userId, HttpServletRequest request) {
         var result = metricasService.getSummary(userId);
 
-        return new GlobalResponseHandler().handleResponse(
-                "Resumen de métricas obtenido correctamente.",
-                result,
-                HttpStatus.OK,
-                request
-        );
+        return new GlobalResponseHandler().handleResponse("Resumen de métricas obtenido correctamente.", result, HttpStatus.OK, request);
     }
 
     // Metricas agrupadas por fecha
     @GetMapping("/user/{userId}/by-date")
     @PreAuthorize("isAuthenticated()")
-    public ResponseEntity<?> getMetricsByDateRange(
-            @PathVariable Long userId,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end,
-            HttpServletRequest request
-    ) {
+    public ResponseEntity<?> getMetricsByDateRange(@PathVariable Long userId, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end, HttpServletRequest request) {
         if (end.isBefore(start)) {
-            return new GlobalResponseHandler().handleResponse(
-                    "La fecha final no puede ser menor que la fecha inicial.",
-                    HttpStatus.BAD_REQUEST,
-                    request
-            );
+            return new GlobalResponseHandler().handleResponse("La fecha final no puede ser menor que la fecha inicial.", HttpStatus.BAD_REQUEST, request);
         }
 
         var result = metricasService.getMetricsByDateRange(userId, start, end);
 
-        return new GlobalResponseHandler().handleResponse(
-                "Métricas por rango de fechas obtenidas correctamente.",
-                result,
-                HttpStatus.OK,
-                request
-        );
+        return new GlobalResponseHandler().handleResponse("Métricas por rango de fechas obtenidas correctamente.", result, HttpStatus.OK, request);
+    }
+
+    // Métricas globales del administrador
+    @GetMapping("/admin")
+    @PreAuthorize("hasRole('SUPER_ADMIN_ROLE')")
+    public ResponseEntity<?> getAdminMetrics(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate start, @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end, HttpServletRequest request) {
+        if (end.isBefore(start)) {
+            return new GlobalResponseHandler().handleResponse("La fecha final no puede ser menor que la fecha inicial.", HttpStatus.BAD_REQUEST, request);
+        }
+
+        var result = metricasService.getAdminMetrics(start, end);
+
+        return new GlobalResponseHandler().handleResponse("Métricas globales del administrador obtenidas correctamente.", result, HttpStatus.OK, request);
+    }
+
+    // Métricas globales sin rango de fechas
+    @GetMapping("/admin/global")
+    @PreAuthorize("hasRole('SUPER_ADMIN_ROLE')")
+    public ResponseEntity<?> getAdminMetricsGlobal(HttpServletRequest request) {
+
+        var result = metricasService.getAdminMetricsGlobal();
+
+        return new GlobalResponseHandler().handleResponse("Métricas globales obtenidas correctamente.", result, HttpStatus.OK, request);
     }
 }
