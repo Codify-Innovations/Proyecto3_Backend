@@ -34,25 +34,6 @@ public class AdminController {
 
     @PostMapping
     @PreAuthorize("hasRole('SUPER_ADMIN_ROLE')")
-    public User createAdministrator(@RequestBody User newAdminUser) {
-        Optional<Role> optionalRole = roleRepository.findByName(RoleEnum.SUPER_ADMIN_ROLE);
-
-        if (optionalRole.isEmpty()) {
-            return null;
-        }
-
-        var user = new User();
-        user.setName(newAdminUser.getName());
-        user.setEmail(newAdminUser.getEmail());
-        user.setPassword(passwordEncoder.encode(newAdminUser.getPassword()));
-        user.setRole(optionalRole.get());
-
-        return userRepository.save(user);
-    }
-
-
-    @PostMapping
-    @PreAuthorize("hasRole('SUPER_ADMIN_ROLE')")
     public ResponseEntity<?> createAdministrator(@RequestBody User newAdminUser, HttpServletRequest request) {
         Optional<Role> optionalRole = roleRepository.findByName(RoleEnum.SUPER_ADMIN_ROLE);
 

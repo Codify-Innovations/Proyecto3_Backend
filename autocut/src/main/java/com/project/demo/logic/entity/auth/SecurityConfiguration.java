@@ -37,7 +37,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors() 
+                .cors()
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests((authorize) -> authorize
@@ -72,11 +72,6 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", config);
 
         return source;
-    }
-
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }
 
