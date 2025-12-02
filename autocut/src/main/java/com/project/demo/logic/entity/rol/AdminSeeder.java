@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Order(2) // Hay un seeder de orden 1
 @Component
-public class AdminSeeder implements ApplicationListener<ContextRefreshedEvent> {
+public class  AdminSeeder implements ApplicationListener<ContextRefreshedEvent> {
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
 
