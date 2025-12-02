@@ -9,11 +9,14 @@ import com.project.demo.logic.entity.rol.RoleEnum;
 import com.project.demo.logic.entity.rol.RoleRepository;
 import com.project.demo.logic.entity.user.User;
 import com.project.demo.logic.entity.user.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Collections;
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class GoogleAuthService {
@@ -23,6 +26,9 @@ public class GoogleAuthService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     public GoogleAuthService(UserRepository userRepository, RoleRepository roleRepository) {
         this.userRepository = userRepository;
@@ -57,7 +63,7 @@ public class GoogleAuthService {
         User newUser = new User();
         newUser.setEmail(email);
         newUser.setName(name);
-        newUser.setPassword("GOOGLE_USER");
+        newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
 
         Optional<Role> userRole = roleRepository.findByName(RoleEnum.USER);
         userRole.ifPresent(newUser::setRole);

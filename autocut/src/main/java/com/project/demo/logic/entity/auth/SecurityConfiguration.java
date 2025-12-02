@@ -8,6 +8,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
@@ -35,7 +37,7 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .cors() // 🔥 Habilita CORS
+                .cors() 
                 .and()
                 .csrf().disable()
                 .authorizeHttpRequests((authorize) -> authorize
@@ -43,7 +45,7 @@ public class SecurityConfiguration {
                         .requestMatchers(HttpMethod.POST, "/auth/**").permitAll()
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/api/vehiculos/**").permitAll()
-                        .requestMatchers("/users/explore-users").permitAll()  // 🔥 Permitir tu endpoint público
+                        .requestMatchers("/users/explore-users").permitAll()
                         .requestMatchers("/api/reportes/**").permitAll()
                         .anyRequest().authenticated()
                 )
@@ -56,7 +58,7 @@ public class SecurityConfiguration {
         return http.build();
     }
 
-    // 🔥 CORS CONFIG — PERMITE ANGULAR localhost:4200
+    // CORS CONFIG — PERMITE ANGULAR localhost:4200
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
@@ -70,6 +72,11 @@ public class SecurityConfiguration {
         source.registerCorsConfiguration("/**", config);
 
         return source;
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
     }
 }
 
