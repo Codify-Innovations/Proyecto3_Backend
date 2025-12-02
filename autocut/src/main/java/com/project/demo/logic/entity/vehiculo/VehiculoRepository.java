@@ -13,9 +13,8 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, Long> {
 
     Page<Vehiculo> findByUsuarioId(Long usuarioId, Pageable pageable);
 
- 
     List<Vehiculo> findByUsuarioId(Long usuarioId);
-
+    List<Vehiculo> findByUsuarioIdOrderByIdDesc(Long usuarioId);
     List<Vehiculo> findByMarcaContainingIgnoreCase(String marca);
     List<Vehiculo> findByModeloContainingIgnoreCase(String modelo);
 
@@ -29,4 +28,3 @@ public interface VehiculoRepository extends JpaRepository<Vehiculo, Long> {
 
     long countByCreatedAtBetween(LocalDateTime start, LocalDateTime end);
 }
-
