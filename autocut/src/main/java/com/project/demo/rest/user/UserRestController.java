@@ -326,7 +326,6 @@ public ResponseEntity<?> getPublicProfile(
         HttpServletRequest request
 ) {
 
-
     Optional<User> optional = userRepository.findByUsername(valor);
 
     if (optional.isEmpty() && valor.contains("@")) {
@@ -357,7 +356,7 @@ public ResponseEntity<?> getPublicProfile(
         customization = customizationService.getCustomizationByUser(user.getId());
     } catch (Exception ignored) {}
 
-    var cars = vehiculoRepository.findByUsuarioId(user.getId());
+    var cars = vehiculoRepository.findByUsuarioIdOrderByIdDesc(user.getId());
 
     var logros = logrosService.getUnlockedAchievements(user);
 
