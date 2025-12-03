@@ -105,7 +105,7 @@ public class UserRestController {
         userRepository.save(user);
 
         return new GlobalResponseHandler().handleResponse(
-                "User updated successfully",
+                "Usuario actualizado exitosamente",
                 user,
                 HttpStatus.OK,
                 request
