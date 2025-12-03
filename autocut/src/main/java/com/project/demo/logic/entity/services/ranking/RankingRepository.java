@@ -25,6 +25,7 @@ public interface RankingRepository extends JpaRepository<User, Long> {
             FROM usuarios_logros
             GROUP BY usuario_id
         ) l ON l.usuario_id = u.id
+        WHERE u.email <> 'super.admin@gmail.com'
         ORDER BY totalVehiculos DESC, totalLogros DESC
         LIMIT 5
         """, nativeQuery = true)
